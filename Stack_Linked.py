@@ -23,11 +23,5 @@ class Stack:
 	def push(self,value):
 		self._top=_Stack_Node(value,self._top)
 
-	def __iter__(self):
-		current=self._top
-		while current is not None:
-			yield current._value
-			current=current._next
-
 
 
