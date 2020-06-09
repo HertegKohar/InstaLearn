@@ -61,10 +61,10 @@ class Instabot:
 		self.notification.send('Starting Data Collection')
 		if self.file_size()<1:
 			try:
-				data=self.random_creator()
-				self.export_to_file('InstaData.csv',data)
-				self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
-				self.notification.send('Finished round of data collection')
+				for data in commenters(self.posts.pop()):
+					self.export_to_file('InstaData.csv',data)
+					self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
+					self.notification.send('Finished round of data collection')
 			except:
 				Instabot.LOGGER.critical('Unable to run')
 				self.notification.send('Exception caught unable to run check log')
@@ -73,6 +73,36 @@ class Instabot:
 			Instabot.LOGGER.warning('File size>= 1 MB')
 			self.notification.send('File size>= 1 MB')
 			sys.exit()
+
+	def commenters(self,post,limit=20):
+		comments=post.get_comments()
+		for _ in range(limit):
+			try:
+				profile=next(comments).owner
+				info=(profile.username,
+					profile.mediacount,
+					profile.followers,
+					profile.followees,
+					int(profile.is_private),
+					int('@' in str(profile.biography.encode('utf-8'))) ,
+					int(profile.external_url is not None),
+					int(profile.is_verified)
+						)
+				yield info
+				Instabot.LOGGER.debug('Gathered Info on {}'.format(profile.username))
+			except StopIteration:
+				Instabot.LOGGER.debug('End of the iterator')
+				raise StopIteration
+			except ProfileNotExistsException:
+				Instabot.LOGGER.debug('Profile not available')
+
+	def export_to_file(self,filename,shared_data_list):
+		with open(filename,'a') as fv:
+			for shared_data in shared_data_list:
+				info=str(shared_data)[1:-1].replace("'","")
+				info.replace(" ","")
+				fv.write(info+'\n')
+		self.notification.send('Exported commenters to file')
 
 	def extract_data(self,users):
 		shared_data_list=[]
@@ -98,7 +128,6 @@ class Instabot:
 				self.notification.send('Too many requests need to cool down, closing program')
 				sys.exit()
 		return shared_data_list
-
 
 
 	def extract_data_i(self,profiles,limit=20):
@@ -131,13 +160,7 @@ class Instabot:
 				sys.exit()
 		return shared_data_list
 
-	def export_to_file(self,filename,shared_data_list):
-		with open(filename,'a') as fv:
-			for shared_data in shared_data_list:
-				info=str(shared_data)[1:-1].replace("'","")
-				info.replace(" ","")
-				fv.write(info+'\n')
-		self.notification.send('Exported commenters to file')
+	
 
 	def collect_file_data(self,filename):
 		with open(filename,'r') as fv:
@@ -179,54 +202,7 @@ class Instabot:
 		profiles=profile.get_similar_accounts()
 		shared_data_list=self.extract_data_i(profiles)
 		insert_db(shared_data_list)
-		return users
-
-	def random_creator(self):
-		with open('Creators.txt','r') as fv:
-			creators=[]
-			for line in fv:
-				creators.append(line.strip())
-		creator=choice(creators)
-		Instabot.LOGGER.debug('Getting Post from {}'.format(creator))
-		shared_data_list=self.commenters(creator)
-		return shared_data_list
-
-	def commenters(self,user,limit=20):
-		try:
-			profile=Profile.from_username(self.I_session.context,user)
-		except ConnectionException:
-				Instabot.LOGGER.warning('Too many requests need to cool down')
-				self.notification.send('Too many requests need to cool down, closing program')
-				sys.exit()
-
-		posts=profile.get_posts()
-		post=next(posts)
-		comments=post.get_comments()
-		shared_data_list=[]
-		i=0
-		looping=True
-		while i<limit and looping:
-			try:
-				profile=next(comments).owner
-				info=(profile.username,
-					profile.mediacount,
-					profile.followers,
-					profile.followees,
-					int(profile.is_private),
-					int('@' in str(profile.biography.encode('utf-8'))) ,
-					int(profile.external_url is not None),
-					int(profile.is_verified)
-						)
-				shared_data_list.append(info)
-				i+=1
-				Instabot.LOGGER.debug('Gathered Info on {}'.format(profile.username))
-			except StopIteration:
-				looping=False
-				Instabot.LOGGER.debug('End of the iterator')
-			except ProfileNotExistsException:
-				Instabot.LOGGER.debug('Profile not available')
-		
-		return shared_data_list
+		return users		
 
 	def show_users_data(self,users):
 		print(search_db(users))
