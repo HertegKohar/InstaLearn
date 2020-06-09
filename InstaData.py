@@ -70,9 +70,9 @@ class Instabot:
 			except AssertionError:
 				self.get_posts()
 
-			except:
-				Instabot.LOGGER.critical('Unable to run')
-				self.notification.send('Exception caught unable to run check log')
+			except Exception as err:
+				Instabot.LOGGER.critical('Unable to run: {}'.format(err))
+				self.notification.send('Exception caught unable to run: {}'.format(err))
 				sys.exit()
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')
