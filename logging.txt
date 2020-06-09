@@ -1,21 +1,2 @@
-DEBUG 2020-06-09 15:47:14,342 - Loaded Bot
-DEBUG 2020-06-09 15:47:16,938 - Starting new HTTPS connection (1): www.instagram.com:443
-DEBUG 2020-06-09 15:47:18,365 - https://www.instagram.com:443 "GET /p/CBObjhIneI7/ HTTP/1.1" 200 20801
-DEBUG 2020-06-09 15:47:18,897 - Starting new HTTPS connection (1): www.instagram.com:443
-DEBUG 2020-06-09 15:47:19,370 - https://www.instagram.com:443 "GET /graphql/query?variables=%7B%22first%22%3A50%2C%22shortcode%22%3A%22CBObjhIneI7%22%7D&query_hash=97b41c52301f77ce508f55e66d17620e HTTP/1.1" 200 9886
-DEBUG 2020-06-09 15:47:20,309 - https://www.instagram.com:443 "GET /championsleague/ HTTP/1.1" 200 29084
-DEBUG 2020-06-09 15:47:20,938 - https://www.instagram.com:443 "GET /calista_rowan/ HTTP/1.1" 200 12878
-DEBUG 2020-06-09 15:47:21,360 - https://www.instagram.com:443 "GET /kursatkocakk/ HTTP/1.1" 200 12645
-DEBUG 2020-06-09 15:47:24,166 - https://www.instagram.com:443 "GET /ugurpooyraz/ HTTP/1.1" 200 12624
-DEBUG 2020-06-09 15:47:27,828 - https://www.instagram.com:443 "GET /dogruasim/ HTTP/1.1" 200 12593
-DEBUG 2020-06-09 15:47:32,393 - https://www.instagram.com:443 "GET /mc.bomb3r/ HTTP/1.1" 200 21497
-DEBUG 2020-06-09 15:47:32,627 - https://www.instagram.com:443 "GET /ozshn2/ HTTP/1.1" 200 12670
-DEBUG 2020-06-09 15:47:39,265 - https://www.instagram.com:443 "GET /realmirersa/ HTTP/1.1" 200 26945
-DEBUG 2020-06-09 15:47:39,734 - https://www.instagram.com:443 "GET /imraaniii.7_/ HTTP/1.1" 200 12725
-DEBUG 2020-06-09 15:47:40,172 - https://www.instagram.com:443 "GET /alessandroorestanti/ HTTP/1.1" 200 12578
-DEBUG 2020-06-09 15:47:41,226 - https://www.instagram.com:443 "GET /aliii_sardariyan/ HTTP/1.1" 200 12643
-DEBUG 2020-06-09 15:47:42,126 - https://www.instagram.com:443 "GET /yuusuf.aidid/ HTTP/1.1" 200 12809
-DEBUG 2020-06-09 15:47:43,251 - https://www.instagram.com:443 "GET /mexian_mello/ HTTP/1.1" 200 26163
-DEBUG 2020-06-09 15:47:44,486 - https://www.instagram.com:443 "GET /qixo_football/ HTTP/1.1" 200 23525
-DEBUG 2020-06-09 15:47:48,540 - https://www.instagram.com:443 "GET /dilipchhetri27/ HTTP/1.1" 200 19345
-DEBUG 2020-06-09 15:47:50,764 - https://www.instagram.com:443 "GET /axyad77/ HTTP/1.1" 200 12772
+DEBUG 2020-06-09 18:20:26,375 - Loaded Bot
+DEBUG 2020-06-09 18:20:26,776 - Exported to pickle file

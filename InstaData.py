@@ -61,10 +61,16 @@ class Instabot:
 		self.notification.send('Starting Data Collection')
 		if self.file_size()<1:
 			try:
-				for data in commenters(self.posts.pop()):
-					self.export_to_file('InstaData.csv',data)
-					self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
-					self.notification.send('Finished round of data collection')
+				post=self.posts.pop()
+				self.export_to_file('InstaData.csv',self.commenters(post))
+				Instabot.LOGGER.debug('Got info on {} post(s)'.format(i))
+				self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
+				self.notification.send('Finished round of data collection')
+				self.get_posts()
+
+			except AssertionError:
+				self.get_posts()
+
 			except:
 				Instabot.LOGGER.critical('Unable to run')
 				self.notification.send('Exception caught unable to run check log')
