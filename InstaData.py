@@ -11,32 +11,31 @@ import sys
 import pickle
 from Stack_Linked import Stack
 from datetime import datetime
+
 class Instabot:
 	logging.basicConfig(filename='logging.txt',filemode='w',format='%(levelname)s %(asctime)s - %(message)s',\
 		 	level=logging.DEBUG)
 	LOGGER=logging.getLogger()
 
-	def __init__(self,username,password):
+	def __init__(self,username=os.environ.get('IG_USER'),password=os.environ.get('IG_PASS')):
 		self.username=username
 		self.password=password
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
-		self.comments=Stack()
+		self.posts=Stack()
 		self.notification=Notify()
 		today=datetime.today()
 		self.date_stamp=datetime(today.year,today.month,today.day,0,0,0)
 
-	def insert_comments(self):
-		self._insert_comments_aux(self.I_session.get_feed_posts())
+	def get_posts(self):
+		self._insert_posts_aux(self.I_session.get_feed_posts())
 
-	def _insert_comments_aux(self,posts):
+	def _insert_posts_aux(self,posts):
 		try:
 			post=next(posts)
-			print(post.date_utc>self.date_stamp)
-			print(post.date_utc,self.date_stamp)
 			if post.date_utc>self.date_stamp:
-				self._insert_comments_aux(posts)
-				self.comments.push(post)
+				self._insert_posts_aux(posts)
+				self.posts.push(post)
 				self.date_stamp=post.date_utc
 		except StopIteration:
 			return

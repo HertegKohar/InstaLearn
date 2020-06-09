@@ -1,1 +1,1 @@
-DEBUG 2020-06-09 12:09:07,727 - Loaded Bot
+DEBUG 2020-06-09 14:11:29,501 - Loaded Bot
