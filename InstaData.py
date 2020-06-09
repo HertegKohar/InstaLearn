@@ -63,7 +63,6 @@ class Instabot:
 			try:
 				post=self.posts.pop()
 				self.export_to_file('InstaData.csv',self.commenters(post))
-				Instabot.LOGGER.debug('Got info on {} post(s)'.format(i))
 				self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
 				self.notification.send('Finished round of data collection')
 				self.get_posts()
