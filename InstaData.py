@@ -21,7 +21,7 @@ class Instabot:
 		self.password=password
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
-		self.comments=list(self.I_session.get_feed_posts())
+		self.comments=Stack()
 		self.notification=Notify()
 		today=datetime.today()
 		self.date_stamp=datetime(today.year,today.month,today.day,0,0,0)
@@ -177,8 +177,6 @@ class Instabot:
 				Instabot.LOGGER.warning('Too many requests need to cool down')
 				self.notification.send('Too many requests need to cool down, closing program')
 				sys.exit()
-		i=0
-		looping=True
 		profiles=profile.get_similar_accounts()
 		shared_data_list=self.extract_data_i(profiles)
 		insert_db(shared_data_list)
