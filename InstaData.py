@@ -11,6 +11,7 @@ import sys
 import pickle
 from Stack_Linked import Stack
 from datetime import datetime
+import traceback
 
 class Instabot:
 	logging.basicConfig(filename='logging.txt',filemode='w',format='%(levelname)s %(asctime)s - %(message)s',\
@@ -71,8 +72,8 @@ class Instabot:
 				self.get_posts()
 
 			except Exception as err:
-				Instabot.LOGGER.critical('Unable to run: {}'.format(err))
-				self.notification.send('Exception caught unable to run: {}'.format(err))
+				Instabot.LOGGER.error(traceback.format_exc())
+				self.notification.send('Exception caught unable to run: {}'.format(traceback.format_exc()))
 				sys.exit()
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')
