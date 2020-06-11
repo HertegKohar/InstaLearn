@@ -78,6 +78,7 @@ class Instabot:
 			except Exception as err:
 				self.notification.send(traceback.format_exc())
 				Instabot.LOGGER.error(traceback.format_exc())
+				sys.exit()
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')
 			self.notification.send('File size>= 1 MB')
