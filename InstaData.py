@@ -75,6 +75,9 @@ class Instabot:
 				self.notification.send("Too many requests need to cool down")
 				Instabot.LOGGER.error('Too many requests need to cool down')
 				sys.exit()
+			except Exception as err:
+				self.notification.send(traceback.format_exc())
+				Instabot.LOGGER.error(traceback.format_exc())
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')
 			self.notification.send('File size>= 1 MB')
