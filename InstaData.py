@@ -3,7 +3,7 @@ import instaloader
 import logging
 from Instabase import *
 from instaloader import Profile
-from instaloader.exceptions import ProfileNotExistsException,ConnectionException
+from instaloader.exceptions import *
 from random import choice
 import os
 from notify_run import Notify
@@ -71,9 +71,9 @@ class Instabot:
 			except AssertionError:
 				self.get_posts()
 
-			except Exception as err:
-				Instabot.LOGGER.error(traceback.format_exc())
-				self.notification.send('Exception caught unable to run: {}'.format(traceback.format_exc()))
+			except ConnectionException:
+				self.notification.send("Too many requests need to cool down")
+				Instabot.LOGGER.error('Too many requests need to cool down')
 				sys.exit()
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')

@@ -1,2 +1,19 @@
-DEBUG 2020-06-10 10:52:04,693 - Loaded Bot
-DEBUG 2020-06-10 10:52:04,693 - Exported to pickle file
+DEBUG 2020-06-10 22:06:13,365 - Loaded Bot
+DEBUG 2020-06-10 22:06:13,373 - Starting new HTTPS connection (1): notify.run:443
+DEBUG 2020-06-10 22:06:14,104 - https://notify.run:443 "POST /PslUPZlMYJ360j5d HTTP/1.1" 200 2
+DEBUG 2020-06-10 22:06:14,333 - Starting new HTTPS connection (1): www.instagram.com:443
+DEBUG 2020-06-10 22:06:14,852 - https://www.instagram.com:443 "GET /p/CBRnxssJcyi/ HTTP/1.1" 200 24413
+DEBUG 2020-06-10 22:06:17,427 - Starting new HTTPS connection (1): www.instagram.com:443
+DEBUG 2020-06-10 22:06:17,895 - https://www.instagram.com:443 "GET /graphql/query?query_hash=97b41c52301f77ce508f55e66d17620e&variables=%7B%22shortcode%22%3A%22CBRnxssJcyi%22%2C%22first%22%3A50%7D HTTP/1.1" 200 11517
+DEBUG 2020-06-10 22:06:24,025 - https://www.instagram.com:443 "GET /brgridiron/ HTTP/1.1" 200 32933
+DEBUG 2020-06-10 22:06:24,041 - Gathered Info on brgridiron
+DEBUG 2020-06-10 22:06:26,224 - https://www.instagram.com:443 "GET /aditya.katkol/ HTTP/1.1" 200 12787
+DEBUG 2020-06-10 22:06:26,232 - Gathered Info on aditya.katkol
+DEBUG 2020-06-10 22:06:27,058 - https://www.instagram.com:443 "GET /_joshcohn/ HTTP/1.1" 200 12602
+DEBUG 2020-06-10 22:06:27,066 - Gathered Info on _joshcohn
+DEBUG 2020-06-10 22:06:27,599 - https://www.instagram.com:443 "GET /nickrod03_/ HTTP/1.1" 200 12444
+DEBUG 2020-06-10 22:06:27,615 - Gathered Info on nickrod03_
+DEBUG 2020-06-10 22:06:28,802 - https://www.instagram.com:443 "GET /abel_lula/ HTTP/1.1" 200 12591
+DEBUG 2020-06-10 22:06:28,810 - Gathered Info on abel_lula
+DEBUG 2020-06-10 22:06:33,448 - https://www.instagram.com:443 "GET /liqudated/ HTTP/1.1" 200 18709
+DEBUG 2020-06-10 22:06:33,456 - Gathered Info on liqudated
