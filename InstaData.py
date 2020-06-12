@@ -19,8 +19,6 @@ class Instabot:
 	LOGGER=logging.getLogger()
 
 	def __init__(self,username=os.environ.get('IG_USER'),password=os.environ.get('IG_PASS')):
-		self.username=username
-		self.password=password
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
 		self.posts=Stack()

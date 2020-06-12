@@ -26,6 +26,13 @@ class Stack:
 	def terminate(self):
 		self._top=None
 
+	#Testing Purposes Only
+	def __iter__(self):
+		current=self._top
+		while current:
+			yield current._value
+			current=current._next
+
 
 
 
