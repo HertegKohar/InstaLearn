@@ -59,7 +59,7 @@ class Instabot:
 		return size
 	
 	def get_post_comments(self):
-		posts=self.posts.pop()
+		post=self.posts.pop()
 		self.export_to_file('InstaData.csv',self.commenters(post))
 		self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
 		self.notification.send('Finished round of data collection')
