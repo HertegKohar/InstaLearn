@@ -23,5 +23,9 @@ class Stack:
 	def push(self,value):
 		self._top=_Stack_Node(value,self._top)
 
+	def terminate(self):
+		self._top=None
+
+
 
 

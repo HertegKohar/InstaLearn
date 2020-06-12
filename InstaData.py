@@ -75,8 +75,8 @@ class Instabot:
 				self.get_posts()
 
 			except ConnectionException:
-				self.notification.send("Too many requests need to cool down")
-				Instabot.LOGGER.error('Too many requests need to cool down')
+				self.notification.send("Can't get info on the post, trying again with the next one")
+				Instabot.LOGGER.error("Can't get info on post")
 				sys.exit()
 
 			except Exception as err:
