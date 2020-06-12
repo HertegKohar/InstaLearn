@@ -58,14 +58,17 @@ class Instabot:
 		size=file_stats.st_size / (1024 * 1024)
 		return size
 	
+	def get_post_comments(self):
+		posts=self.posts.pop()
+		self.export_to_file('InstaData.csv',self.commenters(post))
+		self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
+		self.notification.send('Finished round of data collection')
+
 	def server_task(self):
 		self.notification.send('Starting Data Collection')
 		if self.file_size()<1:
 			try:
-				post=self.posts.pop()
-				self.export_to_file('InstaData.csv',self.commenters(post))
-				self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
-				self.notification.send('Finished round of data collection')
+				self.get_post_comments()
 				self.get_posts()
 
 			except AssertionError:
@@ -75,6 +78,7 @@ class Instabot:
 				self.notification.send("Too many requests need to cool down")
 				Instabot.LOGGER.error('Too many requests need to cool down')
 				sys.exit()
+
 			except Exception as err:
 				self.notification.send(traceback.format_exc())
 				Instabot.LOGGER.error(traceback.format_exc())
