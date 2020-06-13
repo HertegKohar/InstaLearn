@@ -45,7 +45,6 @@ def search_db(users):
 	df=pd.DataFrame(columns=['User','Posts','Followers','Following','Private','Bio_Tag','External_Url','Verified'])
 	for user in users:
 		cursor.execute("SELECT * FROM insta_train WHERE username='{:s}'".format(user))
-		s=None
 		for output in cursor:
 			s=output
 		if s:
