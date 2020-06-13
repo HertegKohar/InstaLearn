@@ -75,9 +75,9 @@ class Instabot:
 				self.get_posts()
 				self.save_bot()
 
-			except ConnectionException:
+			except ConnectionException as err:
 				self.notification.send("Can't get info on post need to cool down")
-				Instabot.LOGGER.debug("Can't get info on post need to cool down")
+				Instabot.LOGGER.warning("{}".format(err))
 				sys.exit()
 
 			except Exception as err:
