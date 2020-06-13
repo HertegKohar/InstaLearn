@@ -82,16 +82,14 @@ class Instabot:
 				self.posts.remove_all()
 				self.get_posts()
 				self.save_bot()
-				sys.exit()
 
 			except Exception as err:
 				self.notification.send(traceback.format_exc())
 				Instabot.LOGGER.error(traceback.format_exc())
-				sys.exit()
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')
 			self.notification.send('File size>= 1 MB')
-			sys.exit()
+		
 
 	def commenters(self,post,limit=20):
 		comments=post.get_comments()
