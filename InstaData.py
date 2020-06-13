@@ -27,6 +27,7 @@ class Instabot:
 
 	def get_posts(self):
 		self._insert_posts_aux(self.I_session.get_feed_posts())
+		self.date_stamp=self.posts.peek().date_utc
 
 	def _insert_posts_aux(self,posts):
 		try:
@@ -34,7 +35,6 @@ class Instabot:
 			if post.date_utc!=self.date_stamp:
 				self._insert_posts_aux(posts)
 				self.posts.push(post)
-				self.date_stamp=post.date_utc
 		except StopIteration:
 			return
 
