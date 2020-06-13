@@ -23,8 +23,7 @@ class Instabot:
 		self.I_session.login(username,password)
 		self.posts=Stack()
 		self.notification=Notify()
-		today=datetime.today()
-		self.date_stamp=datetime(today.year,today.month,today.day,0,0,0)
+		self.date_stamp=next(self.I_session.get_feed_posts()).date_utc
 
 	def get_posts(self):
 		self._insert_posts_aux(self.I_session.get_feed_posts())
@@ -32,7 +31,7 @@ class Instabot:
 	def _insert_posts_aux(self,posts):
 		try:
 			post=next(posts)
-			if post.date_utc>self.date_stamp:
+			if post.date_utc!=self.date_stamp:
 				self._insert_posts_aux(posts)
 				self.posts.push(post)
 				self.date_stamp=post.date_utc
@@ -77,11 +76,9 @@ class Instabot:
 				self.save_bot()
 
 			except ConnectionException:
-				self.notification.send("Can't get info on the post")
-				Instabot.LOGGER.debug("Can't get info on post, removing all posts")
-				self.posts.remove_all()
-				self.get_posts()
-				self.save_bot()
+				self.notification.send("Can't get info on post need to cool down")
+				Instabot.LOGGER.debug("Can't get info on post need to cool down")
+				sys.exit()
 
 			except Exception as err:
 				self.notification.send(traceback.format_exc())

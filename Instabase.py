@@ -29,30 +29,31 @@ def insert_db(data):
 	cursor.close()
 	connection.close()
 
+def size():
+	connection=connect_db()
+	cursor=connection.cursor()
+	cursor.execute('SELECT COUNT(*) FROM insta_train')
+	for output in cursor:
+		print(output[0])
+	cursor.close()
+	connection.close()
 
 def search_db(users):
 	connection=connect_db()
 	cursor=connection.cursor()
 	pd.set_option('display.max_columns', None)
-	df=pd.DataFrame(columns=['User','Posts','Followers','Following','Private','External_Url','Verified'])
-	rows=''
+	df=pd.DataFrame(columns=['User','Posts','Followers','Following','Private','Bio_Tag','External_Url','Verified'])
 	for user in users:
 		cursor.execute("SELECT * FROM insta_train WHERE username='{:s}'".format(user))
+		s=None
 		for output in cursor:
-			s=str(output)
-		try:
-			s=s[1:-1]
-			s=s.replace("'",'')
-			s=s.replace(" ","")
-			s=s.split(',')
-			for i in range(4,7):
-				s[i]=str(bool(int(s[i])))
-			df_temp={'User':s[0],'Posts':s[1],'Followers':s[2],'Following':s[3],'Private':s[4],\
-					'External_Url':s[5],'Verified':s[6]}
+			s=output
+		if s:
+			df_temp={'User':s[0],'Posts':s[1],'Followers':s[2],'Following':s[3],'Private':bool(s[4]),\
+					'Bio_Tag':bool(s[5]),'External_Url':bool(s[6]),'Verified':bool(s[7])}
 			df=df.append(df_temp,ignore_index=True)
-		except:
+		else:
 			df=df.append({'User':user},ignore_index=True)
 	cursor.close()
 	connection.close()
-
 	return df
