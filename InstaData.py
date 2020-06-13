@@ -68,13 +68,20 @@ class Instabot:
 			try:
 				self.get_post_comments()
 				self.get_posts()
+				self.save_bot()
 
 			except AssertionError:
+				self.notification.send('No post available getting posts')
+				Instabot.LOGGER.debug('No post available getting posts')
 				self.get_posts()
+				self.save_bot()
 
 			except ConnectionException:
-				self.notification.send("Can't get info on the post, trying again with the next one")
-				Instabot.LOGGER.error("Can't get info on post")
+				self.notification.send("Can't get info on the post")
+				Instabot.LOGGER.debug("Can't get info on post, removing all posts")
+				self.posts.remove_all()
+				self.get_posts()
+				self.save_bot()
 				sys.exit()
 
 			except Exception as err:

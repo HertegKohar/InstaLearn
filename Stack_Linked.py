@@ -23,7 +23,7 @@ class Stack:
 	def push(self,value):
 		self._top=_Stack_Node(value,self._top)
 
-	def terminate(self):
+	def remove_all(self):
 		self._top=None
 
 	#Testing Purposes Only
