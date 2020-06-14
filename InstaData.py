@@ -68,7 +68,6 @@ class Instabot:
 				self.get_post_comments()
 				self.get_posts()
 				self.save_bot()
-
 			except AssertionError:
 				self.notification.send('No post available getting posts')
 				Instabot.LOGGER.debug('No post available getting posts')
@@ -98,7 +97,7 @@ class Instabot:
 					profile.followers,
 					profile.followees,
 					int(profile.is_private),
-					int('@' in str(profile.biography.encode('utf-8'))) ,
+					int('@' in str(profile.biography.encode('utf-8'))),
 					int(profile.external_url is not None),
 					int(profile.is_verified)
 						)
@@ -184,7 +183,7 @@ class Instabot:
 				info=line.split(',')
 				shared_data_list.append(tuple(info))
 		insert_db(shared_data_list)
-
+		print(size())
 
 	def collect_users_data(self,users):
 		shared_data_list=[]

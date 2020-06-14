@@ -24,5 +24,3 @@ DESCRIBE insta_train;
 
 
 
-
-
