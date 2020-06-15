@@ -47,7 +47,13 @@ class Instabot:
 
 	def save_bot(self):
 		with open('bot.pickle','wb') as pickle_out:
-			pickle.dump(self,pickle_out)
+			try:
+				pickle.dump(self,pickle_out)
+			except RecursionError:
+				self.posts.keep_top()
+				pickle.dump(self,pickle_out)
+				self.notification.send('Too many posts to pickle in Stack')
+
 		Instabot.LOGGER.debug('Exported to pickle file')
 
 	def file_size(self):

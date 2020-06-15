@@ -23,8 +23,8 @@ class Stack:
 	def push(self,value):
 		self._top=_Stack_Node(value,self._top)
 
-	def remove_all(self):
-		self._top=None
+	def keep_top(self):
+		self._top._next=None
 
 	#Testing Purposes Only
 	def __iter__(self):

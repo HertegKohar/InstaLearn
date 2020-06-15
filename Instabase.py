@@ -34,9 +34,10 @@ def size():
 	cursor=connection.cursor()
 	cursor.execute('SELECT COUNT(*) FROM insta_train')
 	for output in cursor:
-		print(output[0])
+		rows=output[0]
 	cursor.close()
 	connection.close()
+	return rows
 
 def search_db(users):
 	connection=connect_db()
