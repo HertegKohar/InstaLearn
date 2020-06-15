@@ -12,11 +12,12 @@ import pickle
 from Stack_Linked import Stack
 from datetime import datetime
 import traceback
-
+from pytz import timezone
 class Instabot:
 	logging.basicConfig(filename='logging.txt',filemode='w',format='%(levelname)s %(asctime)s - %(message)s',\
 		 	level=logging.DEBUG)
 	LOGGER=logging.getLogger()
+	EST=timezone('Canada/Eastern')
 
 	def __init__(self,username=os.environ.get('IG_USER'),password=os.environ.get('IG_PASS')):
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
@@ -68,29 +69,29 @@ class Instabot:
 		self.notification.send('Finished round of data collection')
 
 	def server_task(self):
-		self.notification.send('Starting Data Collection')
+		self.notification.send('Starting Data Collection, {}'.format(datetime.now(EST)))
 		if self.file_size()<1:
 			try:
 				self.get_post_comments()
 				self.get_posts()
 				self.save_bot()
 			except AssertionError:
-				self.notification.send('No post available getting posts')
+				self.notification.send('No post available getting posts, {}'.format(datetime.now(EST)))
 				Instabot.LOGGER.debug('No post available getting posts')
 				self.get_posts()
 				self.save_bot()
 
 			except ConnectionException as err:
-				self.notification.send("Can't get info on post need to cool down")
+				self.notification.send("Can't get info on post need to cool down, {}".format(datetime.now(EST)))
 				Instabot.LOGGER.warning("{}".format(err))
 				sys.exit()
 
 			except Exception as err:
-				self.notification.send(traceback.format_exc())
+				self.notification.send(traceback.format_exc(), datetime.now(EST))
 				Instabot.LOGGER.error(traceback.format_exc())
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')
-			self.notification.send('File size>= 1 MB')
+			self.notification.send('File size>= 1 MB, {}'.format(datetime.now(EST)))
 		
 
 	def commenters(self,post,limit=20):
