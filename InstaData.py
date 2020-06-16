@@ -186,10 +186,13 @@ class Instabot:
 	def collect_file_data(self,filename):
 		with open(filename,'r') as fv:
 			fv.seek(0)
+			h_map={}
 			shared_data_list=[]
 			for line in fv:
 				info=line.split(',')
-				shared_data_list.append(tuple(info))
+				if info[0] not in h_map:
+					shared_data_list.append(tuple(info))
+					h_map[info [0]]=None
 		insert_db(shared_data_list)
 		print(size())
 
