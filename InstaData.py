@@ -70,20 +70,20 @@ class Instabot:
 		self.notification.send('Finished round of data collection')
 
 	def server_task(self):
-		self.notification.send('Starting Data Collection, {}'.format(datetime.now(EST)))
+		self.notification.send('Starting Data Collection, {}'.format(datetime.now(Instabot.EST)))
 		if self.file_size()<1:
 			try:
 				self.get_post_comments()
 				self.get_posts()
 				self.save_bot()
 			except AssertionError:
-				self.notification.send('No post available getting posts, {}'.format(datetime.now(EST)))
+				self.notification.send('No post available getting posts, {}'.format(datetime.now(Instabot.EST)))
 				Instabot.LOGGER.debug('No post available getting posts')
 				self.get_posts()
 				self.save_bot()
 
 			except ConnectionException as err:
-				self.notification.send("Can't get info on post need to cool down, {}".format(datetime.now(EST)))
+				self.notification.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
 				Instabot.LOGGER.warning("{}".format(err))
 				sys.exit()
 
@@ -123,7 +123,7 @@ class Instabot:
 				info=str(shared_data)[1:-1].replace("'","")
 				info.replace(" ","")
 				fv.write(info+'\n')
-		self.notification.send('Exported commenters to file')
+		self.notification.send('Exported commenters to file, {}'.format(Instabot.EST))
 
 	def extract_data(self,users):
 		shared_data_list=[]
