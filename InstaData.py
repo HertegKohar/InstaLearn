@@ -13,6 +13,7 @@ from Stack_Linked import Stack
 from datetime import datetime
 import traceback
 from pytz import timezone
+
 class Instabot:
 	logging.basicConfig(filename='logging.txt',filemode='w',format='%(levelname)s %(asctime)s - %(message)s',\
 		 	level=logging.DEBUG)
