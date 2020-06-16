@@ -88,11 +88,11 @@ class Instabot:
 				sys.exit()
 
 			except Exception as err:
-				self.notification.send(traceback.format_exc(), datetime.now(EST))
+				self.notification.send(traceback.format_exc(), datetime.now(Instabot.EST))
 				Instabot.LOGGER.error(traceback.format_exc())
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')
-			self.notification.send('File size>= 1 MB, {}'.format(datetime.now(EST)))
+			self.notification.send('File size>= 1 MB, {}'.format(datetime.now(Instabot.EST)))
 		
 
 	def commenters(self,post,limit=20):
