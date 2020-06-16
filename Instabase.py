@@ -1,7 +1,6 @@
 import mysql.connector
 import pandas as pd
-from io import StringIO
-from mysql.connector.errors import InterfaceError
+from mysql.connector.errors import IntegrityError
 import os
 
 #Have to use .commit on database connection to save changes made in script
@@ -23,9 +22,11 @@ def insert_db(data):
 	for info in data:
 		try:
 			cursor.execute(add_info,info)
+		except IntegrityError:
+			cursor.execute(""" UPDATE insta_train SET posts={d[1]}, followers={d[2]}, following={d[3]}, private={d[4]}, 
+				bio_tag={d[5]}, external_url={d[6]}, verified={d[7]} WHERE username='{d[0]}'""".format(d=info))
+		finally:
 			connection.commit()
-		except:
-			continue
 	cursor.close()
 	connection.close()
 
