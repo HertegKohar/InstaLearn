@@ -47,6 +47,7 @@ def search_db(users):
 	df=pd.DataFrame(columns=['User','Posts','Followers','Following','Private','Bio_Tag','External_Url','Verified'])
 	for user in users:
 		cursor.execute("SELECT * FROM insta_train WHERE username='{:s}'".format(user))
+		s=None
 		for output in cursor:
 			s=output
 		if s:
@@ -55,6 +56,23 @@ def search_db(users):
 			df=df.append(df_temp,ignore_index=True)
 		else:
 			df=df.append({'User':user},ignore_index=True)
+	cursor.close()
+	connection.close()
+	return df
+
+def query_db(users):
+	connection=connect_db()
+	cursor=connection.cursor()
+	df=pd.DataFrame(columns=['User','Found'])
+	for user in users:
+		cursor.execute("SELECT * FROM insta_train WHERE username='{:s}'".format(user))
+		s=None
+		for output in cursor:
+			s=output
+		if not s:
+			df=df.append({'User':user,'Found':True},ignore_index=True)
+		else:
+			df=df.append({'User':user,'Found':False},ignore_index=True)
 	cursor.close()
 	connection.close()
 	return df

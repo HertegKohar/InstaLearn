@@ -210,7 +210,7 @@ class Instabot:
 				user=line.strip()
 				if user not in h_map:
 					users.append(user)
-					h_map[user]=0
+					h_map[user]=None
 
 		shared_data_list=self.extract_data(users)
 		insert_db(shared_data_list)
@@ -229,7 +229,19 @@ class Instabot:
 		return users		
 
 	def show_users_data(self,users):
+		h_map={}
+		i=0
+		while i<len(users):
+			if users[i] in h_map:
+				users.pop(i)
+			else:
+				h_map[users[i]]=None
+				i+=1
+
 		print(search_db(users))
+
+	def query(self,users):
+		print(query_db(users))
 
 	def show_users_data_file(self,filename):
 	    with open(filename,'r') as fv:
@@ -240,5 +252,5 @@ class Instabot:
 	            user=line.strip()
 	            if user not in h_map:
 	                users.append(user)
-	                h_map[user]=0
+	                h_map[user]=None
 	    print(search_db(users))
