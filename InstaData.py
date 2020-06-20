@@ -77,15 +77,13 @@ class Instabot:
 		self.notification.send('Starting Data Collection, {}'.format(datetime.now(Instabot.EST)))
 		if not self.cooldown:
 			try:
-				self.get_post_comments()
-				self.get_posts()
+				if not self.posts.is_empty():
+					self.get_post_comments()
+					self.get_posts()
+				else:
+					self.get_posts()
 				self.save_bot()
-			except AssertionError:
-				self.notification.send('No post available getting posts, {}'.format(datetime.now(Instabot.EST)))
-				Instabot.LOGGER.debug('No post available getting posts')
-				self.get_posts()
-				self.save_bot()
-
+				
 			except QueryReturnedNotFoundException as err:
 				self.notification.send('404 Error Code')
 				Instabot.LOGGER.warning('{}'.format(err))
