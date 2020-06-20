@@ -25,7 +25,8 @@ class Instabot:
 		self.I_session.login(username,password)
 		self.posts=Stack()
 		self.notification=Notify()
-		self.date_stamp=next(self.I_session.get_feed_posts()).date_utc
+		self.date_stamp=self.set_date_stamp()
+		self.cooldown=False
 
 	def get_posts(self):
 		self._insert_posts_aux(self.I_session.get_feed_posts())
@@ -39,6 +40,9 @@ class Instabot:
 				self.posts.push(post)
 		except StopIteration:
 			return
+
+	def set_date_stamp(self):
+		self.date_stamp=next(self.I_session.get_feed_posts()).date_utc
 
 	@staticmethod
 	def load_bot():
@@ -71,7 +75,7 @@ class Instabot:
 
 	def server_task(self):
 		self.notification.send('Starting Data Collection, {}'.format(datetime.now(Instabot.EST)))
-		if self.file_size()<1:
+		if not self.cooldown:
 			try:
 				self.get_post_comments()
 				self.get_posts()
@@ -86,17 +90,20 @@ class Instabot:
 				self.notification.send('404 Error Code')
 				Instabot.LOGGER.warning('{}'.format(err))
 				self.save_bot()
+
 			except ConnectionException as err:
 				self.notification.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
 				Instabot.LOGGER.warning("{}".format(err))
-				sys.exit()
+				self.cooldown=True
+				self.save_bot()
 
 			except Exception as err:
 				self.notification.send(traceback.format_exc(), datetime.now(Instabot.EST))
-				Instabot.LOGGER.error('Error: {}'.format(err),traceback.format_exc())
+				Instabot.LOGGER.error(traceback.format_exc())
+				sys.exit()
 		else:
-			Instabot.LOGGER.warning('File size>= 1 MB')
-			self.notification.send('File size>= 1 MB, {}'.format(datetime.now(Instabot.EST)))
+			Instabot.LOGGER.warning('Need to cooldown')
+			self.notification.send('Cooldown required, {}'.format(datetime.now(Instabot.EST)))
 		
 
 	def commenters(self,post,limit=20):
