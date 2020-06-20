@@ -82,6 +82,10 @@ class Instabot:
 				self.get_posts()
 				self.save_bot()
 
+			except QueryReturnedNotFoundException as err:
+				self.notification.send('404 Error Code')
+				Instabot.LOGGER.warning('{}'.format(err))
+				self.save_bot()
 			except ConnectionException as err:
 				self.notification.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
 				Instabot.LOGGER.warning("{}".format(err))
@@ -89,7 +93,7 @@ class Instabot:
 
 			except Exception as err:
 				self.notification.send(traceback.format_exc(), datetime.now(Instabot.EST))
-				Instabot.LOGGER.error(traceback.format_exc())
+				Instabot.LOGGER.error('Error: {}'.format(err),traceback.format_exc())
 		else:
 			Instabot.LOGGER.warning('File size>= 1 MB')
 			self.notification.send('File size>= 1 MB, {}'.format(datetime.now(Instabot.EST)))
