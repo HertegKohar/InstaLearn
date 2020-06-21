@@ -24,6 +24,7 @@ class Stack:
 		self._top=_Stack_Node(value,self._top)
 
 	def keep_top(self):
+		assert self._top is not None, "Can't keep top of an empty stack"
 		self._top._next=None
 
 	#Testing Purposes Only

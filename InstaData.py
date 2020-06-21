@@ -30,7 +30,8 @@ class Instabot:
 
 	def get_posts(self):
 		self._insert_posts_aux(self.I_session.get_feed_posts())
-		self.date_stamp=self.posts.peek().date_utc
+		if not self.posts.is_empty():
+			self.date_stamp=self.posts.peek().date_utc
 
 	def _insert_posts_aux(self,posts):
 		try:

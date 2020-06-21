@@ -69,7 +69,7 @@ def query_db(users):
 		s=None
 		for output in cursor:
 			s=output
-		if not s:
+		if s:
 			df=df.append({'User':user,'Found':True},ignore_index=True)
 		else:
 			df=df.append({'User':user,'Found':False},ignore_index=True)
