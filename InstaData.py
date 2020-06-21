@@ -42,8 +42,15 @@ class Instabot:
 		except StopIteration:
 			return
 
+	def reset_cooldown(self):
+		self.cooldown= not self.cooldown
+
 	def set_date_stamp(self):
 		self.date_stamp=next(self.I_session.get_feed_posts()).date_utc
+
+	def reset(self):
+		self.reset_cooldown()
+		self.set_date_stamp()
 
 	@staticmethod
 	def load_bot():
@@ -93,7 +100,7 @@ class Instabot:
 			except ConnectionException as err:
 				self.notification.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
 				Instabot.LOGGER.warning("{}".format(err))
-				self.cooldown=True
+				self.reset_cooldown()
 				self.save_bot()
 
 			except Exception as err:
