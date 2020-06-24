@@ -63,5 +63,7 @@ def evaluate_model(samples):
 samples=convert_csv('InstaData.csv')
 model=KMeans(3)
 model.fit(samples[0:20])
+evaluate_model(samples)
 display_clusters(model,samples[0:20])
+
 
