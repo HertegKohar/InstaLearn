@@ -1,3 +1,4 @@
+from copy import deepcopy
 class _Stack_Node:
 	def __init__(self,value,next_):
 		self._value=value
