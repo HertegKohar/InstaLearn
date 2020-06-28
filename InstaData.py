@@ -13,6 +13,7 @@ from Stack_Linked import Stack
 from datetime import datetime
 import traceback
 from pytz import timezone
+import concurrent.futures
 
 class Instabot:
 	logging.basicConfig(filename='logging.txt',filemode='w',format='%(levelname)s %(asctime)s - %(message)s',\
@@ -77,7 +78,7 @@ class Instabot:
 	
 	def get_post_comments(self):
 		post=self.posts.pop()
-		self.export_to_file('InstaData.csv',self.commenters(post))
+		self.commenters(post.get_comments())
 		self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
 		self.notification.send('Finished round of data collection')
 
@@ -112,12 +113,27 @@ class Instabot:
 			self.notification.send('Cooldown required, {}'.format(datetime.now(Instabot.EST)))
 		
 
-	def commenters(self,post,limit=20):
-		comments=post.get_comments()
-		for _ in range(limit):
-			try:
-				profile=next(comments).owner
-				info=(profile.username,
+	def commenters(self,comments,limit=20):
+		with concurrent.futures.ThreadPoolExecutor() as executor:
+			shared_data_list=[executor.submit(self.extract_data,next(comments).owner) for _ in range(limit)]
+			with open('InstaData.csv','a') as fv:
+				for shared_data in concurrent.futures.as_completed(shared_data_list):
+					try:
+						info=str(shared_data.result())[1:-1].replace("'","")
+						info=info.replace(" ","")
+						fv.write(info+'\n')
+						Instabot.LOGGER('Wrote user info to file')
+					except ProfileNotExistsException:
+						Instabot.LOGGER.debug('Profile not available')
+					except StopIteration:
+						Instabot.LOGGER.debug('End of comment iterator')
+						fv.close()
+						sys.exit()
+
+
+
+	def extract_data(self,profile):
+		info=(profile.username,
 					profile.mediacount,
 					profile.followers,
 					profile.followees,
@@ -126,46 +142,17 @@ class Instabot:
 					int(profile.external_url is not None),
 					int(profile.is_verified)
 						)
-				yield info
-				Instabot.LOGGER.debug('Gathered Info on {}'.format(profile.username))
-			except StopIteration:
-				Instabot.LOGGER.debug('End of the iterator')
-				raise StopIteration
-			except ProfileNotExistsException:
-				Instabot.LOGGER.debug('Profile not available')
+		return info
 
 	def export_to_file(self,filename,shared_data_list):
 		with open(filename,'a') as fv:
 			for shared_data in shared_data_list:
 				info=str(shared_data)[1:-1].replace("'","")
-				info.replace(" ","")
+				info=info.replace(" ","")
 				fv.write(info+'\n')
 		self.notification.send('Exported commenters to file, {}'.format(Instabot.EST))
 
-	def extract_data(self,users):
-		shared_data_list=[]
-		for user in users:
-			try:
-				profile=Profile.from_username(self.I_session.context,user)
-				info=(
-					user,
-					profile.mediacount,
-					profile.followers,
-					profile.followees,
-					int(profile.is_private),
-					int('@' in str(profile.biography.encode('utf-8'))),
-					int(profile.external_url is not None),
-					int(profile.is_verified)
-					)
-				shared_data_list.append(info)
-			except ProfileNotExistsException:
-				Instabot.LOGGER.debug('Unable to find: {}'.format(user))
-				continue
-			except ConnectionException:
-				Instabot.LOGGER.warning('Too many requests need to cool down')
-				self.notification.send('Too many requests need to cool down, closing program')
-				sys.exit()
-		return shared_data_list
+	
 
 
 	def extract_data_i(self,profiles,limit=20):
