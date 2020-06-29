@@ -36,7 +36,6 @@ class Instabot:
 			result=func(*args,**kwargs)
 			exec_time=time.time()-start_time
 			Instabot.LOGGER.debug('Gathering information with notifications took: {} seconds'.format(exec_time))
-			self.notification.send('Time to get commenters: {} seconds'.format(exec_time))
 			return result
 		return wrapper
 
