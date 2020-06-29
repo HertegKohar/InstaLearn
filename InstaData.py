@@ -14,6 +14,7 @@ from datetime import datetime
 import traceback
 from pytz import timezone
 import concurrent.futures
+import time
 
 class Instabot:
 	logging.basicConfig(filename='logging.txt',filemode='w',format='%(levelname)s %(asctime)s - %(message)s',\
@@ -28,6 +29,17 @@ class Instabot:
 		self.notification=Notify()
 		self.date_stamp=self.set_date_stamp()
 		self.cooldown=False
+
+	def timer(func):
+		def wrapper(*args,**kwargs):
+			start_time=time.time()
+			result=func(*args,**kwargs)
+			exec_time=time.time()-start_time
+			Instabot.LOGGER.debug('Gathering information with notifications took: {} seconds'.format(exec_time))
+			self.notification.send('Time to get commenters: {} seconds'.format(exec_time))
+			return result
+		return wrapper
+
 
 	def get_posts(self):
 		self._insert_posts_aux(self.I_session.get_feed_posts())
@@ -75,7 +87,8 @@ class Instabot:
 		file_stats=os.stat('InstaData.csv')
 		size=file_stats.st_size / (1024 * 1024)
 		return size
-	
+
+	@timer
 	def get_post_comments(self):
 		post=self.posts.pop()
 		self.commenters(post.get_comments())
@@ -88,7 +101,6 @@ class Instabot:
 			try:
 				if not self.posts.is_empty():
 					self.get_post_comments()
-					self.get_posts()
 				else:
 					self.get_posts()
 				self.save_bot()
@@ -112,17 +124,16 @@ class Instabot:
 			Instabot.LOGGER.warning('Need to cooldown')
 			self.notification.send('Cooldown required, {}'.format(datetime.now(Instabot.EST)))
 		
-
+	
 	def commenters(self,comments,limit=20):
 		with concurrent.futures.ThreadPoolExecutor() as executor:
 			shared_data_list=[executor.submit(self.extract_data,next(comments).owner) for _ in range(limit)]
 			with open('InstaData.csv','a') as fv:
 				for shared_data in concurrent.futures.as_completed(shared_data_list):
 					try:
-						info=str(shared_data.result())[1:-1].replace("'","")
-						info=info.replace(" ","")
+						info=",".join(shared_data.result())
 						fv.write(info+'\n')
-						Instabot.LOGGER('Wrote user info to file')
+						Instabot.LOGGER.debug('Wrote user info to file')
 					except ProfileNotExistsException:
 						Instabot.LOGGER.debug('Profile not available')
 					except StopIteration:
@@ -134,14 +145,14 @@ class Instabot:
 
 	def extract_data(self,profile):
 		info=(profile.username,
-					profile.mediacount,
-					profile.followers,
-					profile.followees,
-					int(profile.is_private),
-					int('@' in str(profile.biography.encode('utf-8'))),
-					int(profile.external_url is not None),
-					int(profile.is_verified)
-						)
+			str(profile.mediacount),
+			str(profile.followers),
+			str(profile.followees),
+			str(int(profile.is_private)),
+			str(int('@' in str(profile.biography.encode('utf-8')))),
+			str(int(profile.external_url is not None)),
+			str(int(profile.is_verified))
+				)
 		return info
 
 	def export_to_file(self,filename,shared_data_list):
@@ -152,16 +163,11 @@ class Instabot:
 				fv.write(info+'\n')
 		self.notification.send('Exported commenters to file, {}'.format(Instabot.EST))
 
-	
 
-
-	def extract_data_i(self,profiles,limit=20):
-		looping=True
-		i=0
-		shared_data_list=[]
-		while i<limit and looping:
+	def extract_data_i(self,comments,limit=20):
+		for _ in range(limit):
 			try:
-				profile=next(profiles)
+				profile=next(comments).owner
 				info=(profile.username,
 					profile.mediacount,
 					profile.followers,
@@ -171,19 +177,13 @@ class Instabot:
 					int(profile.external_url is not None),
 					int(profile.is_verified)
 						)
-				shared_data_list.append(info)
-				i+=1
-				Instabot.LOGGER.debug('Gather information on {}'.format(profile.username))
+				yield info
+				Instabot.LOGGER.debug('Gathered Info on {}'.format(profile.username))
+			except StopIteration:
+				Instabot.LOGGER.debug('End of the iterator')
+				raise StopIteration
 			except ProfileNotExistsException:
 				Instabot.LOGGER.debug('Profile not available')
-			except StopIteration:
-				looping=False
-				Instabot.LOGGER.debug('End of iterator')
-			except ConnectionException:
-				Instabot.LOGGER.warning('Too many requests need to cool down')
-				self.notification.send('Too many requests need to cool down, closing program')
-				sys.exit()
-		return shared_data_list
 
 	
 
