@@ -21,12 +21,12 @@ class Instabot:
 		 	level=logging.DEBUG)
 	LOGGER=logging.getLogger()
 	EST=timezone('Canada/Eastern')
+	NOTIFICATION=Notify()
 
 	def __init__(self,username=os.environ.get('IG_USER'),password=os.environ.get('IG_PASS')):
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
 		self.posts=Stack()
-		self.notification=Notify()
 		self.date_stamp=self.set_date_stamp()
 		self.cooldown=False
 
@@ -36,6 +36,7 @@ class Instabot:
 			result=func(*args,**kwargs)
 			exec_time=time.time()-start_time
 			Instabot.LOGGER.debug('Gathering information with notifications took: {} seconds'.format(exec_time))
+			Instabot.NOTIFICATION.send('{} seconds to collect info'.format(exec_time))
 			return result
 		return wrapper
 
@@ -78,7 +79,7 @@ class Instabot:
 			except RecursionError:
 				self.posts.keep_top()
 				pickle.dump(self,pickle_out)
-				self.notification.send('Too many posts to pickle in Stack')
+				Instabot.NOTIFICATION.send('Too many posts to pickle in Stack')
 
 		Instabot.LOGGER.debug('Exported to pickle file')
 
@@ -91,37 +92,38 @@ class Instabot:
 	def get_post_comments(self):
 		post=self.posts.pop()
 		self.commenters(post.get_comments())
-		self.notification.send('InstaData.csv Size: {} MB'.format(self.file_size()))
-		self.notification.send('Finished round of data collection')
+		Instabot.NOTIFICATION.send('InstaData.csv Size: {} MB'.format(self.file_size()))
+		Instabot.NOTIFICATION.send('Finished round of data collection')
 
 	def server_task(self):
-		self.notification.send('Starting Data Collection, {}'.format(datetime.now(Instabot.EST)))
+		Instabot.NOTIFICATION.send('Starting Data Collection, {}'.format(datetime.now(Instabot.EST)))
 		if not self.cooldown:
 			try:
 				if not self.posts.is_empty():
 					self.get_post_comments()
+					self.get_posts()
 				else:
 					self.get_posts()
 				self.save_bot()
 				
 			except QueryReturnedNotFoundException as err:
-				self.notification.send('404 Error Code')
+				Instabot.NOTIFICATION.send('404 Error Code')
 				Instabot.LOGGER.warning('{}'.format(err))
 				self.save_bot()
 
 			except ConnectionException as err:
-				self.notification.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
+				Instabot.NOTIFICATION.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
 				Instabot.LOGGER.warning("{}".format(err))
 				self.reset_cooldown()
 				self.save_bot()
 
 			except Exception as err:
-				self.notification.send(traceback.format_exc(), datetime.now(Instabot.EST))
+				Instabot.NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.EST))
 				Instabot.LOGGER.error(traceback.format_exc())
 				sys.exit()
 		else:
 			Instabot.LOGGER.warning('Need to cooldown')
-			self.notification.send('Cooldown required, {}'.format(datetime.now(Instabot.EST)))
+			Instabot.NOTIFICATION.send('Cooldown required, {}'.format(datetime.now(Instabot.EST)))
 		
 	
 	def commenters(self,comments,limit=20):
@@ -160,7 +162,7 @@ class Instabot:
 				info=str(shared_data)[1:-1].replace("'","")
 				info=info.replace(" ","")
 				fv.write(info+'\n')
-		self.notification.send('Exported commenters to file, {}'.format(Instabot.EST))
+		Instabot.NOTIFICATION.send('Exported commenters to file, {}'.format(Instabot.EST))
 
 
 	def extract_data_i(self,comments,limit=20):
@@ -224,7 +226,7 @@ class Instabot:
 			profile=Profile.from_username(self.I_session.context,user)
 		except ConnectionException:
 				Instabot.LOGGER.warning('Too many requests need to cool down')
-				self.notification.send('Too many requests need to cool down, closing program')
+				Instabot.NOTIFICATION.send('Too many requests need to cool down, closing program')
 				sys.exit()
 		profiles=profile.get_similar_accounts()
 		shared_data_list=self.extract_data_i(profiles)
