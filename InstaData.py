@@ -122,8 +122,8 @@ class Instabot:
 				Instabot.LOGGER.error(traceback.format_exc())
 				sys.exit()
 		else:
-			Instabot.LOGGER.warning('Need to cooldown')
-			Instabot.NOTIFICATION.send('Cooldown required, {}'.format(datetime.now(Instabot.EST)))
+			Instabot.LOGGER.warning('Cooldown previously activated')
+			Instabot.NOTIFICATION.send('Cooldown previously activated, {}'.format(datetime.now(Instabot.EST)))
 		
 	
 	def commenters(self,comments,limit=20):
