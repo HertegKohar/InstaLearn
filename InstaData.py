@@ -79,6 +79,7 @@ class Instabot:
 			except RecursionError:
 				self.posts.keep_top()
 				pickle.dump(self,pickle_out)
+				Instabot.LOGGER.debug("Too many posts to pickle in Stack")
 				Instabot.NOTIFICATION.send('Too many posts to pickle in Stack')
 
 		Instabot.LOGGER.debug('Exported to pickle file')
@@ -128,20 +129,21 @@ class Instabot:
 	
 	def commenters(self,comments,limit=20):
 		with concurrent.futures.ThreadPoolExecutor() as executor:
-			shared_data_list=[executor.submit(self.extract_data,next(comments).owner) for _ in range(limit)]
-			with open('InstaData.csv','a') as fv:
-				for shared_data in concurrent.futures.as_completed(shared_data_list):
-					try:
-						info=",".join(shared_data.result())
-						fv.write(info+'\n')
-						Instabot.LOGGER.debug('Wrote user info to file')
-					except ProfileNotExistsException:
-						Instabot.LOGGER.debug('Profile not available')
-					except StopIteration:
-						Instabot.LOGGER.debug('End of comment iterator')
-						fv.close()
-						sys.exit()
-
+			shared_data_list=[]
+			try:
+				for _ in range(limit):
+					shared_data_list.append(executor.submit(self.extract_data,next(comments).owner))
+			except StopIteration:
+				Instabot.LOGGER.debug("End of comment iterator")
+			finally:
+				with open('InstaData.csv','a') as fv:
+					for shared_data in concurrent.futures.as_completed(shared_data_list):
+						try:
+							info=",".join(shared_data.result())
+							fv.write(info+'\n')
+							Instabot.LOGGER.debug('Wrote user info to file')
+						except ProfileNotExistsException:
+							Instabot.LOGGER.debug('Profile not available')
 
 
 	def extract_data(self,profile):
