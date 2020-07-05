@@ -4,6 +4,7 @@ from mysql.connector.errors import IntegrityError
 import os
 
 #Have to use .commit on database connection to save changes made in script
+#Create a connection instance in order to communicate with the database
 def connect_db():
 	db_connection=mysql.connector.connect(
         host="localhost",
@@ -13,6 +14,7 @@ def connect_db():
         database='instabase')
 	return db_connection
 
+#Insert data into the database given the processed data
 def insert_db(data):
 	connection=connect_db()
 	cursor=connection.cursor()
@@ -30,6 +32,7 @@ def insert_db(data):
 	cursor.close()
 	connection.close()
 
+#Return the number of rows in the database
 def size():
 	connection=connect_db()
 	cursor=connection.cursor()
@@ -40,6 +43,7 @@ def size():
 	connection.close()
 	return rows
 
+#Search the data base and show the results of the row or return a row of unavailable columns
 def search_db(users):
 	connection=connect_db()
 	cursor=connection.cursor()
@@ -60,6 +64,7 @@ def search_db(users):
 	connection.close()
 	return df
 
+#Quert and return True or False to whether the user in the in the database
 def query_db(users):
 	connection=connect_db()
 	cursor=connection.cursor()

@@ -17,19 +17,25 @@ import concurrent.futures
 import time
 
 class Instabot:
+	#Initialize basic logger
 	logging.basicConfig(filename='logging.txt',filemode='w',format='%(levelname)s %(asctime)s - %(message)s',\
 		 	level=logging.DEBUG)
 	LOGGER=logging.getLogger()
+	#Set the timezone and intialize notification to send messages during execution
 	EST=timezone('Canada/Eastern')
 	NOTIFICATION=Notify()
 
 	def __init__(self,username=os.environ.get('IG_USER'),password=os.environ.get('IG_PASS')):
+		#Create an Instaloader instance
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
+		#Intialize a stack to hold the posts
 		self.posts=Stack()
+		#Set the date stamp and cooldown
 		self.date_stamp=self.set_date_stamp()
 		self.cooldown=False
 
+	#Time wrapper to get the execution time of a function
 	def timer(func):
 		def wrapper(*args,**kwargs):
 			start_time=time.time()
@@ -40,13 +46,18 @@ class Instabot:
 			return result
 		return wrapper
 
-
+	#The user based function which invokes a recursive function call
 	def get_posts(self):
 		self._insert_posts_aux(self.I_session.get_feed_posts())
 		if not self.posts.is_empty():
 			self.date_stamp=self.posts.peek().date_utc
 
 	def _insert_posts_aux(self,posts):
+		"""
+		Posts come in a generator so to insert them into the stack where the most recent is on the top
+		need to insert recursively
+		Use the date stamp as a comparison so the same post is not processed if it has been seen in a previous run
+		"""
 		try:
 			post=next(posts)
 			if post.date_utc!=self.date_stamp:
@@ -54,17 +65,20 @@ class Instabot:
 				self.posts.push(post)
 		except StopIteration:
 			return
-
+	#Reset cooldown
 	def reset_cooldown(self):
 		self.cooldown= not self.cooldown
 
+	#Find the most recent post and take it's date
 	def set_date_stamp(self):
 		self.date_stamp=next(self.I_session.get_feed_posts()).date_utc
 
+	#Used to reset after a 429 
 	def reset(self):
 		self.reset_cooldown()
 		self.set_date_stamp()
 
+	#Load the bot from a pickle file 
 	@staticmethod
 	def load_bot():
 		with open('bot.pickle','rb') as pickle_in:
@@ -72,6 +86,7 @@ class Instabot:
 		Instabot.LOGGER.debug('Loaded Bot')
 		return bot
 
+	#Save the bot to a pickle file
 	def save_bot(self):
 		with open('bot.pickle','wb') as pickle_out:
 			try:
@@ -84,6 +99,7 @@ class Instabot:
 
 		Instabot.LOGGER.debug('Exported to pickle file')
 
+	#Calculate the file size of the csv in MegaBytes
 	def file_size(self):
 		file_stats=os.stat('InstaData.csv')
 		size=file_stats.st_size / (1024 * 1024)
@@ -91,12 +107,14 @@ class Instabot:
 
 	@timer
 	def get_post_comments(self):
+		#Pop a post off the stack and extract the comments
 		post=self.posts.pop()
 		self.commenters(post.get_comments())
 		Instabot.NOTIFICATION.send('InstaData.csv Size: {} MB'.format(self.file_size()))
 		Instabot.NOTIFICATION.send('Finished round of data collection')
 
 	def server_task(self):
+		#Send a notification for when data collection is commencing
 		Instabot.NOTIFICATION.send('Starting Data Collection, {}'.format(datetime.now(Instabot.EST)))
 		if not self.cooldown:
 			try:
@@ -107,17 +125,20 @@ class Instabot:
 					self.get_posts()
 				self.save_bot()
 				
+			#If the post is unavailable send a notification and save the bot
 			except QueryReturnedNotFoundException as err:
 				Instabot.NOTIFICATION.send('404 Error Code')
 				Instabot.LOGGER.warning('{}'.format(err))
 				self.save_bot()
 
+			#If too many requests has been sent reset cooldown and save
 			except ConnectionException as err:
 				Instabot.NOTIFICATION.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
 				Instabot.LOGGER.warning("{}".format(err))
 				self.reset_cooldown()
 				self.save_bot()
 
+			#Except an unexpected error and exit the program
 			except Exception as err:
 				Instabot.NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.EST))
 				Instabot.LOGGER.error(traceback.format_exc())
@@ -128,6 +149,11 @@ class Instabot:
 		
 	
 	def commenters(self,comments,limit=20):
+		"""
+		Create a ThreadPoolExecutor instance in order to create seperate request for each user's information
+		Pass the extract_data function into the executor and loop through the results 
+		Take the processed informationa and write it into the csv
+		"""
 		with concurrent.futures.ThreadPoolExecutor() as executor:
 			shared_data_list=[]
 			try:
@@ -145,7 +171,7 @@ class Instabot:
 						except ProfileNotExistsException:
 							Instabot.LOGGER.debug('Profile not available')
 
-
+	#Helper method to clean process data
 	def extract_data(self,profile):
 		info=(profile.username,
 			str(profile.mediacount),
@@ -157,6 +183,7 @@ class Instabot:
 			str(int(profile.is_verified))
 				)
 		return info
+
 
 	def export_to_file(self,filename,shared_data_list):
 		with open(filename,'a') as fv:
@@ -247,8 +274,10 @@ class Instabot:
 
 		print(search_db(users))
 
+	#Query the database to see if a user is within it
 	def query(self,users):
 		print(query_db(users))
+
 
 	def show_users_data_file(self,filename):
 	    with open(filename,'r') as fv:
