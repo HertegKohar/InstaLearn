@@ -105,12 +105,35 @@ class Instabot:
 		size=file_stats.st_size / (1024 * 1024)
 		return size
 
+	def set_date_user(self,user):
+		self.date_stamp=next(Profile.from_username(self.I_session.context,user).get_posts()).date_utc
+
+
 	def monitor_user(self,user):
-		profile=Profile.from_username(user)
+		profile=Profile.from_username(self.I_session.context,user)
 		post=next(profile.get_posts())
-		if post.date_utc>self.date_stamp:
-			self.date_stamp=post.date_utc
-			self.commenters(post.get_comments())
+		try:
+			if post.date_utc>self.date_stamp:
+				Instabot.NOTIFICATION.send('New Post')
+				Instabot.LOGGER.debug('New Post Found')
+				self.date_stamp=post.date_utc
+				self.commenters(post.get_comments())
+
+		#If the post is unavailable send a notification and save the bot
+		except QueryReturnedNotFoundException as err:
+			Instabot.NOTIFICATION.send('404 Error Code')
+			Instabot.LOGGER.warning('{}'.format(err))
+
+		#If too many requests has been sent reset cooldown and save
+		except ConnectionException as err:
+			Instabot.NOTIFICATION.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
+			Instabot.LOGGER.warning("{}".format(err))
+			sys.exit()
+		#Except an unexpected error and exit the program
+		except Exception as err:
+			Instabot.NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.EST))
+			Instabot.LOGGER.error(traceback.format_exc())
+			sys.exit()
 
 	@timer
 	def get_post_comments(self):
