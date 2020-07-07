@@ -105,6 +105,13 @@ class Instabot:
 		size=file_stats.st_size / (1024 * 1024)
 		return size
 
+	def monitor_user(self,user):
+		profile=Profile.from_username(user)
+		post=next(profile.get_posts())
+		if post.date_utc>self.date_stamp:
+			self.date_stamp=post.date_utc
+			self.commenters(post.get_comments())
+
 	@timer
 	def get_post_comments(self):
 		#Pop a post off the stack and extract the comments
