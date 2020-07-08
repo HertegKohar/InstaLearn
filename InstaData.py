@@ -29,10 +29,9 @@ class Instabot:
 		#Create an Instaloader instance
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
-		#Intialize a stack to hold the posts
-		self.posts=Stack()
+		self.profile=self.get_profile('bleacherreport')
 		#Set the date stamp and cooldown
-		self.date_stamp=self.set_date_stamp()
+		self.date_stamp=self.set_date_user(self.profile)
 		self.cooldown=False
 
 	#Time wrapper to get the execution time of a function
@@ -105,19 +104,22 @@ class Instabot:
 		size=file_stats.st_size / (1024 * 1024)
 		return size
 
-	def set_date_user(self,user):
-		self.date_stamp=next(Profile.from_username(self.I_session.context,user).get_posts()).date_utc
+	def set_date_user(self,profile):
+		self.date_stamp=next(profile).get_posts().date_utc
+
+	def get_profile(self,user):
+		return Profile.from_username(self.I_session.context,user)
 
 
 	def monitor_user(self,user):
-		profile=Profile.from_username(self.I_session.context,user)
-		post=next(profile.get_posts())
+		post=next(self.profile.get_posts())
 		try:
 			if post.date_utc>self.date_stamp:
 				Instabot.NOTIFICATION.send('New Post')
 				Instabot.LOGGER.debug('New Post Found')
 				self.date_stamp=post.date_utc
 				self.commenters(post.get_comments())
+				self.save_bot()
 
 		#If the post is unavailable send a notification and save the bot
 		except QueryReturnedNotFoundException as err:

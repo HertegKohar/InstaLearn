@@ -1,5 +1,4 @@
 from InstaData import Instabot
 if __name__ == "__main__":
-	bot=Instabot()
-	bot.set_date_user('bleacherreport')
-	bot.save_bot()
+	bot=Instabot.load_bot()
+	bot.monitor_user('bleacherreport')
