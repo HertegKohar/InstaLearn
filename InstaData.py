@@ -29,9 +29,8 @@ class Instabot:
 		#Create an Instaloader instance
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
-		self.profile=self.get_profile('bleacherreport')
 		#Set the date stamp and cooldown
-		self.date_stamp=self.set_date_user(self.profile)
+		#self.date_stamp=self.set_date_user(self.profile)
 		self.cooldown=False
 
 	#Time wrapper to get the execution time of a function
@@ -113,8 +112,9 @@ class Instabot:
 		return Profile.from_username(self.I_session.context,user)
 
 	@timer
-	def monitor_user(self):
-		post=next(self.profile.get_posts())
+	def monitor_user(self,user):
+		profile=self.get_profile(user)
+		post=next(profile.get_posts())
 		try:
 			if post.date_utc>self.date_stamp:
 				Instabot.NOTIFICATION.send('New Post')
