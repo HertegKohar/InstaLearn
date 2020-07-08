@@ -40,8 +40,8 @@ class Instabot:
 			start_time=time.time()
 			result=func(*args,**kwargs)
 			exec_time=time.time()-start_time
-			Instabot.LOGGER.debug('Gathering information with notifications took: {} seconds'.format(exec_time))
-			Instabot.NOTIFICATION.send('{} seconds to collect info'.format(exec_time))
+			Instabot.LOGGER.debug('{} took {} seconds to execute'.format(func.__name__,exec_time))
+			Instabot.NOTIFICATION.send('{} took {} seconds to execute'.format(func.__name__,exec_time))
 			return result
 		return wrapper
 
@@ -89,7 +89,7 @@ class Instabot:
 	def save_bot(self):
 		with open('bot.pickle','wb') as pickle_out:
 			try:
-				pickle.dump(self,pickle_out)
+				pickle.dump(self,pickle_out,protocol=pickle.HIGHEST_PROTOCOL)
 			except RecursionError:
 				self.posts.keep_top()
 				pickle.dump(self,pickle_out)
@@ -105,13 +105,15 @@ class Instabot:
 		return size
 
 	def set_date_user(self,profile):
-		self.date_stamp=next(profile).get_posts().date_utc
+		date_stamp=next(profile.get_posts()).date_utc
+		Instabot.LOGGER.debug('New Date Stamp: {}'.format(date_stamp))
+		return date_stamp
 
 	def get_profile(self,user):
 		return Profile.from_username(self.I_session.context,user)
 
-
-	def monitor_user(self,user):
+	@timer
+	def monitor_user(self):
 		post=next(self.profile.get_posts())
 		try:
 			if post.date_utc>self.date_stamp:
