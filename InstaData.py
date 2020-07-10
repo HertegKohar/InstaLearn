@@ -87,13 +87,8 @@ class Instabot:
 	#Save the bot to a pickle file
 	def save_bot(self):
 		with open('bot.pickle','wb') as pickle_out:
-			try:
-				pickle.dump(self,pickle_out,protocol=pickle.HIGHEST_PROTOCOL)
-			except RecursionError:
-				self.posts.keep_top()
-				pickle.dump(self,pickle_out)
-				Instabot.LOGGER.debug("Too many posts to pickle in Stack")
-				Instabot.NOTIFICATION.send('Too many posts to pickle in Stack')
+			
+			pickle.dump(self,pickle_out,protocol=pickle.HIGHEST_PROTOCOL)
 
 		Instabot.LOGGER.debug('Exported to pickle file')
 
@@ -111,7 +106,6 @@ class Instabot:
 	def get_profile(self,user):
 		return Profile.from_username(self.I_session.context,user)
 
-	@timer
 	def monitor_user(self,user):
 		profile=self.get_profile(user)
 		post=next(profile.get_posts())
