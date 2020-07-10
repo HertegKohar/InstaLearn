@@ -105,24 +105,3 @@ class Wheel:
 		if current is not None:
 			s+='{}<--'.format(current._value)
 		return s
-
-from random import randint
-w=Wheel()
-
-for i in range(randint(1,20)):
-	w.add(i)
-
-print(w)
-
-for _ in range(randint(1,20)):
-	print('Next',w.get_next())
-
-for _ in range(randint(1,10)):
-	print('Pop',w.pop())
-
-print(w.peek())
-print(w)
-
-
-
-
