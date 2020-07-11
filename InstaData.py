@@ -15,6 +15,7 @@ import traceback
 from pytz import timezone
 import concurrent.futures
 import time
+from Wheel_Linked import Wheel
 
 class Instabot:
 	#Initialize basic logger
@@ -29,8 +30,7 @@ class Instabot:
 		#Create an Instaloader instance
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
-		#Set the date stamp and cooldown
-		#self.date_stamp=self.set_date_user(self.profile)
+		self.users=Wheel()
 		self.cooldown=False
 
 	#Time wrapper to get the execution time of a function
@@ -43,6 +43,12 @@ class Instabot:
 			Instabot.NOTIFICATION.send('{} took {} seconds to execute'.format(func.__name__,exec_time))
 			return result
 		return wrapper
+
+	def populate_users(self):
+		users=Profile.from_username(self.I_session.context,os.environ.get('IG_USER')).get_followees()
+		for user in users:
+			self.users.add(user.username)
+
 
 	#The user based function which invokes a recursive function call
 	def get_posts(self):
@@ -175,12 +181,12 @@ class Instabot:
 			Instabot.LOGGER.warning('Cooldown previously activated')
 			Instabot.NOTIFICATION.send('Cooldown previously activated, {}'.format(datetime.now(Instabot.EST)))
 		
-	
+	@timer
 	def commenters(self,comments,limit=20):
 		"""
 		Create a ThreadPoolExecutor instance in order to create seperate request for each user's information
 		Pass the extract_data function into the executor and loop through the results 
-		Take the processed informationa and write it into the csv
+		Take the processed information and write it into the csv
 		"""
 		with concurrent.futures.ThreadPoolExecutor() as executor:
 			shared_data_list=[]
@@ -199,7 +205,7 @@ class Instabot:
 						except ProfileNotExistsException:
 							Instabot.LOGGER.debug('Profile not available')
 
-	#Helper method to clean process data
+	#Helper method to process data
 	def extract_data(self,profile):
 		info=(profile.username,
 			str(profile.mediacount),
