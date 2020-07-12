@@ -15,7 +15,7 @@ import traceback
 from pytz import timezone
 import concurrent.futures
 import time
-from Wheel_Linked import Wheel
+from Circular_Set_Linked import Circular_Set
 
 class Instabot:
 	#Initialize basic logger
@@ -30,7 +30,8 @@ class Instabot:
 		#Create an Instaloader instance
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
-		self.users=Wheel()
+		self.users=Circular_Set()
+		self.add_users()
 		self.cooldown=False
 
 	#Time wrapper to get the execution time of a function
@@ -44,7 +45,7 @@ class Instabot:
 			return result
 		return wrapper
 
-	def populate_users(self):
+	def add_users(self):
 		users=Profile.from_username(self.I_session.context,os.environ.get('IG_USER')).get_followees()
 		for user in users:
 			self.users.add(user.username)
@@ -113,31 +114,36 @@ class Instabot:
 		return Profile.from_username(self.I_session.context,user)
 
 	def monitor_user(self,user):
-		profile=self.get_profile(user)
-		post=next(profile.get_posts())
-		try:
-			if post.date_utc>self.date_stamp:
-				Instabot.NOTIFICATION.send('New Post')
-				Instabot.LOGGER.debug('New Post Found')
-				self.date_stamp=post.date_utc
-				self.commenters(post.get_comments())
-				self.save_bot()
+		if not self.cooldown:
+			try:
+				profile=self.get_profile(user)
+				post=next(profile.get_posts())
+				if post.date_utc>self.date_stamp:
+					Instabot.NOTIFICATION.send('New Post')
+					Instabot.LOGGER.debug('New Post Found')
+					self.date_stamp=post.date_utc
+					self.commenters(post.get_comments())
+					self.save_bot()
 
-		#If the post is unavailable send a notification and save the bot
-		except QueryReturnedNotFoundException as err:
-			Instabot.NOTIFICATION.send('404 Error Code')
-			Instabot.LOGGER.warning('{}'.format(err))
+			#If the post is unavailable send a notification and save the bot
+			except QueryReturnedNotFoundException as err:
+				Instabot.NOTIFICATION.send('404 Error Code')
+				Instabot.LOGGER.warning('{}'.format(err))
 
-		#If too many requests has been sent reset cooldown and save
-		except ConnectionException as err:
-			Instabot.NOTIFICATION.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
-			Instabot.LOGGER.warning("{}".format(err))
-			sys.exit()
-		#Except an unexpected error and exit the program
-		except Exception as err:
-			Instabot.NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.EST))
-			Instabot.LOGGER.error(traceback.format_exc())
-			sys.exit()
+			#If too many requests has been sent reset cooldown and save
+			except ConnectionException as err:
+				Instabot.NOTIFICATION.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
+				Instabot.LOGGER.warning("{}".format(err))
+				self.cooldown=True
+				bot.save_bot()
+			#Except an unexpected error and exit the program
+			except Exception as err:
+				Instabot.NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.EST))
+				Instabot.LOGGER.error(traceback.format_exc())
+				sys.exit()
+		else:
+			Instabot.NOTIFICATION.send('Cooldown activated need to stop cronjob')
+			Instabot.LOGGER.warning('429 Need to cooldown')
 
 	@timer
 	def get_post_comments(self):
