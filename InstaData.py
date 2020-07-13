@@ -15,7 +15,7 @@ import traceback
 from pytz import timezone
 import concurrent.futures
 import time
-from Circular_Set_Linked import Circular_Set
+from Rotating_Set_Linked import Rotating_Set
 
 class Instabot:
 	#Initialize basic logger
@@ -30,7 +30,7 @@ class Instabot:
 		#Create an Instaloader instance
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
-		self.users=Circular_Set()
+		self.users=Rotating_Set()
 		self.add_users()
 		self.cooldown=False
 
@@ -94,9 +94,7 @@ class Instabot:
 	#Save the bot to a pickle file
 	def save_bot(self):
 		with open('bot.pickle','wb') as pickle_out:
-			
 			pickle.dump(self,pickle_out,protocol=pickle.HIGHEST_PROTOCOL)
-
 		Instabot.LOGGER.debug('Exported to pickle file')
 
 	#Calculate the file size of the csv in MegaBytes
