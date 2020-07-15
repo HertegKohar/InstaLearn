@@ -9,13 +9,12 @@ import os
 from notify_run import Notify
 import sys
 import pickle
-from Stack_Linked import Stack
 from datetime import datetime
 import traceback
 from pytz import timezone
 import concurrent.futures
 import time
-from Rotating_Set_Linked import Rotating_Set
+from Wheel_Linked import Wheel
 
 class Instabot:
 	#Initialize basic logger
@@ -30,7 +29,7 @@ class Instabot:
 		#Create an Instaloader instance
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
-		self.users=Rotating_Set()
+		self.users=Wheel()
 		self.add_users()
 		self.cooldown=False
 
@@ -47,6 +46,7 @@ class Instabot:
 
 	def add_users(self):
 		users=Profile.from_username(self.I_session.context,os.environ.get('IG_USER')).get_followees()
+		if not self.users.is_empty(): self.users.clear()
 		for user in users:
 			self.users.add(user.username)
 
@@ -122,6 +122,8 @@ class Instabot:
 					self.date_stamp=post.date_utc
 					self.commenters(post.get_comments())
 					self.save_bot()
+				else:
+					Instabot.LOGGER.debug('No new posts')
 
 			#If the post is unavailable send a notification and save the bot
 			except QueryReturnedNotFoundException as err:
@@ -133,15 +135,24 @@ class Instabot:
 				Instabot.NOTIFICATION.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
 				Instabot.LOGGER.warning("{}".format(err))
 				self.cooldown=True
-				bot.save_bot()
+				self.save_bot()
+				sys.exit()
 			#Except an unexpected error and exit the program
 			except Exception as err:
 				Instabot.NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.EST))
 				Instabot.LOGGER.error(traceback.format_exc())
 				sys.exit()
 		else:
-			Instabot.NOTIFICATION.send('Cooldown activated need to stop cronjob')
 			Instabot.LOGGER.warning('429 Need to cooldown')
+
+	def monitor_users(self):
+		user=self.users.peek()
+		self.monitor_user(user)
+		user=self.users.get_next()
+		while user!=self.users.peek():
+			self.monitor_user(user)
+			user=self.users.get_next()
+
 
 	@timer
 	def get_post_comments(self):
