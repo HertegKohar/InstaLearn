@@ -30,8 +30,10 @@ class Instabot:
 		self.I_session=instaloader.Instaloader(max_connection_attempts=1)
 		self.I_session.login(username,password)
 		self.users=Wheel()
+		self.date_stamp=datetime(datetime.today().year,datetime.today().month,datetime.today().day,0,0)
 		self.add_users()
 		self.cooldown=False
+		
 
 	#Time wrapper to get the execution time of a function
 	def timer(func):
@@ -49,7 +51,15 @@ class Instabot:
 		if not self.users.is_empty(): self.users.clear()
 		for user in users:
 			self.users.add(user.username)
+			Instabot.LOGGER.debug("Added User {}".format(user.username))
+			date_stamp=self.set_date_user(user)
+			if date_stamp>self.date_stamp:
+				self.date_stamp=date_stamp
+		Instabot.LOGGER.debug('New Date Stamp: {}'.format(date_stamp))
 
+	def set_date_user(self,profile):
+		date_stamp=next(profile.get_posts()).date_utc
+		return date_stamp
 
 	#The user based function which invokes a recursive function call
 	def get_posts(self):
@@ -103,56 +113,48 @@ class Instabot:
 		size=file_stats.st_size / (1024 * 1024)
 		return size
 
-	def set_date_user(self,profile):
-		date_stamp=next(profile.get_posts()).date_utc
-		Instabot.LOGGER.debug('New Date Stamp: {}'.format(date_stamp))
-		return date_stamp
-
 	def get_profile(self,user):
 		return Profile.from_username(self.I_session.context,user)
 
 	def monitor_user(self,user):
-		if not self.cooldown:
-			try:
-				profile=self.get_profile(user)
-				post=next(profile.get_posts())
-				if post.date_utc>self.date_stamp:
-					Instabot.NOTIFICATION.send('New Post')
-					Instabot.LOGGER.debug('New Post Found')
-					self.date_stamp=post.date_utc
-					self.commenters(post.get_comments())
-					self.save_bot()
-				else:
-					Instabot.LOGGER.debug('No new posts')
-
-			#If the post is unavailable send a notification and save the bot
-			except QueryReturnedNotFoundException as err:
-				Instabot.NOTIFICATION.send('404 Error Code')
-				Instabot.LOGGER.warning('{}'.format(err))
-
-			#If too many requests has been sent reset cooldown and save
-			except ConnectionException as err:
-				Instabot.NOTIFICATION.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
-				Instabot.LOGGER.warning("{}".format(err))
-				self.cooldown=True
+		try:
+			profile=self.get_profile(user)
+			post=next(profile.get_posts())
+			if post.date_utc>self.date_stamp:
+				Instabot.NOTIFICATION.send('New Post')
+				Instabot.LOGGER.debug('New Post Found')
+				self.date_stamp=post.date_utc
+				self.commenters(post.get_comments())
 				self.save_bot()
-				sys.exit()
-			#Except an unexpected error and exit the program
-			except Exception as err:
-				Instabot.NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.EST))
-				Instabot.LOGGER.error(traceback.format_exc())
-				sys.exit()
-		else:
-			Instabot.LOGGER.warning('429 Need to cooldown')
+			else:
+				Instabot.LOGGER.debug('No new posts')
+				self.save_bot()
+
+		#If the post is unavailable send a notification and save the bot
+		except QueryReturnedNotFoundException as err:
+			Instabot.NOTIFICATION.send('404 Error Code')
+			Instabot.LOGGER.warning('{}'.format(err))
+
+		#If too many requests has been sent reset cooldown and save
+		except ConnectionException as err:
+			Instabot.NOTIFICATION.send("Can't get info on post need to cool down, {}".format(datetime.now(Instabot.EST)))
+			Instabot.LOGGER.warning("{}".format(err))
+			self.cooldown=True
+			self.save_bot()
+			sys.exit()
+		#Except an unexpected error and exit the program
+		except Exception as err:
+			Instabot.NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.EST))
+			Instabot.LOGGER.error(traceback.format_exc())
+			sys.exit()
+		
 
 	def monitor_users(self):
-		user=self.users.peek()
-		self.monitor_user(user)
-		user=self.users.get_next()
-		while user!=self.users.peek():
-			self.monitor_user(user)
+		if not self.cooldown:
 			user=self.users.get_next()
-
+			self.monitor_user(user)
+		else:
+			Instabot.LOGGER.warning('429 Need to cooldown')
 
 	@timer
 	def get_post_comments(self):
@@ -294,6 +296,7 @@ class Instabot:
 				if user not in h_map:
 					users.append(user)
 					h_map[user]=None
+
 
 		shared_data_list=self.extract_data(users)
 		insert_db(shared_data_list)

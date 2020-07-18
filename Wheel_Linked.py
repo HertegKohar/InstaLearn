@@ -51,14 +51,13 @@ class Wheel:
 
 	def add(self,value):
 		if not self._front:
-			self._front=_Set_Node(value,None)
+			self._front=_W_Node(value,None)
 			self._rear=self._front
 			self._current=self._front
 		else:
-			self._rear._next=_Set_Node(value)
+			self._rear._next=_W_Node(value,None)
 			self._rear=self._rear._next		
 		self._count+=1
-		return inserted
 
 	def get_next(self):
 		assert self._front, "Can't get next of an empty wheel"
@@ -123,3 +122,9 @@ class Wheel:
 		assert self._front, "Can't find in an empty wheel"
 		value,_,_=self._linear_search(key)
 		return value
+
+	def __iter__(self):
+		current=self._front
+		while current is not None:
+			yield current._value
+			current=current._next
