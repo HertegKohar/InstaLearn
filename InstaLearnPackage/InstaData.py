@@ -1,7 +1,5 @@
 # Imports
 import instaloader
-import logging
-from Instabase import *
 from instaloader import Profile
 from instaloader.exceptions import *
 from random import choice
@@ -14,7 +12,11 @@ import traceback
 from pytz import timezone
 import concurrent.futures
 import time
-from Wheel_Linked import Wheel
+import logging
+# from Wheel_Linked import Wheel
+# from Instabase import *
+from .Wheel_Linked import Wheel
+from .Instabase import *
 
 class Instabot:
 	#Initialize basic logger
