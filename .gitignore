@@ -1,4 +1,4 @@
-InstaLearnPackage/InstaData.csv
-InstaLearnPackage/__pycache__/
+InstaData.csv
+__pycache__
 bot.pickle
 logging.txt
