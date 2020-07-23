@@ -16,12 +16,17 @@ class AddUser(BaseModel):
 
 templates=Jinja2Templates(directory='templates')
 
+def test_notification():
+	bot.test_notification()
 
 @app.get('/')
 def home(request: Request):
 	return templates.TemplateResponse('home.html',{'request':request})
 
-
 @app.post("/user")
-def add_user(user_request, background_tasks: BackgroundTasks):
-	pass
+async def add_user(request: Request, background_tasks:BackgroundTasks):
+	background_tasks.add_task(test_notification)
+	return {"code":"success"}
+
+	
+
