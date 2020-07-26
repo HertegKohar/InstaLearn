@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, BackgroundTasks, Depends
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-
+from crontab import Crontab
 #Create a FastAPI instance
 app=FastAPI()
 
@@ -20,7 +20,7 @@ async def add_user(request: Request, background_tasks:BackgroundTasks):
 	background_tasks.add_task(test_notification)
 	return {"code":"success"}
 
-@app.post('/run')
+@app.get('/run')
 async def run_cron(request: Request, background_tasks: BackgroundTasks):
 	pass
 
