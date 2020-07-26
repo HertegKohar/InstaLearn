@@ -1,12 +1,6 @@
 from fastapi import FastAPI, Request, BackgroundTasks, Depends
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-import sys
-import os
-os.chdir('..')
-sys.path.append(os.getcwd())
-os.chdir("InstaLearnApp")
-from InstaLearnPackage import bot
 
 #Create a FastAPI instance
 app=FastAPI()
@@ -16,8 +10,6 @@ class AddUser(BaseModel):
 
 templates=Jinja2Templates(directory='templates')
 
-def test_notification():
-	bot.test_notification()
 
 @app.get('/')
 def home(request: Request):
@@ -27,6 +19,11 @@ def home(request: Request):
 async def add_user(request: Request, background_tasks:BackgroundTasks):
 	background_tasks.add_task(test_notification)
 	return {"code":"success"}
+
+@app.post('/run')
+async def run_cron(request: Request, background_tasks: BackgroundTasks):
+	pass
+
 
 	
 
