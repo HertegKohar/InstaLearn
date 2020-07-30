@@ -2,3 +2,4 @@ InstaData.csv
 __pycache__
 bot.pickle
 logging.txt
+server.txt
