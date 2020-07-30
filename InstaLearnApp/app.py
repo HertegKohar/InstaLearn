@@ -24,7 +24,7 @@ async def add_user(request: Request, background_tasks:BackgroundTasks):
 
 def cronjob():
 	with CronTab(user=os.environ.get('user')) as cron:
-		job=cron.new(command='/usr/bin/python3 /home/{:s}/cronjob.py'.format(os.environ.get('user')))
+		job=cron.new(command='cd InstaLearnApp; python3 cronjob.py')
 		job.minute.every(1)
 
 
@@ -35,11 +35,12 @@ async def run_cron(signin_request: SignIn, background_tasks: BackgroundTasks):
 		return {"code":"success"}
 	return {"code":"failed"}
 
-@app.get('/status')
+@app.post('/status')
 async def run_cron(signin_request: SignIn, background_tasks: BackgroundTasks):
 	if signin_request.username==os.environ.get('username') and signin_request.password==os.environ.get('password'):
-		pass
-	return 
+		from InstaDataPackage import bot
+		return {"code":"success","cooldown":str(bot.cooldown)}
+	return {"code":"false"}
 
 
 

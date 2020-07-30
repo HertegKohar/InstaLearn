@@ -62,7 +62,7 @@ class Wheel:
 			self.__rear=self.__rear._next		
 		self.__count+=1
 
-	def get__next(self):
+	def get_next(self):
 		assert self.__front, "Can't get next of an empty wheel"
 		if self.__current is self.__rear:
 			self.__current=self.__front
