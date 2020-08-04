@@ -1,2 +1,3 @@
 from InstaDataPackage import bot
-bot.monitor_users()
+if __name__=="__main__":
+	bot.monitor_users()

@@ -15,6 +15,7 @@ import time
 import logging
 from .Wheel_Linked import Wheel
 from .Instabase import *
+import requests
 # from Wheel_Linked import Wheel
 # from Instabase import *
 
@@ -149,6 +150,9 @@ class Instabot:
 			Instabot.__LOGGER.warning("{}".format(err))
 			self.cooldown=True
 			self.save_bot()
+			json_data={'username':os.environ.get('username'),'password':os.environ.get('password')}
+			response=requests.post('http://localhost:{}'.format(os.environ.get('port')),json=json_data)
+			Instabot.__NOTIFICATION.send('Local Request Status Code: {}'.format(response.status_code))
 			sys.exit()
 		#Except an unexpected error and exit the program
 		except Exception as err:
