@@ -65,6 +65,7 @@ class Instabot:
 			if date_stamp>self.date_stamp:
 				self.date_stamp=date_stamp
 		Instabot.__LOGGER.debug('New Date Stamp: {}'.format(date_stamp))
+		self.save_bot()
 
 	def set_date_user(self,profile):
 		date_stamp=next(profile.get_posts()).date_utc
@@ -150,16 +151,21 @@ class Instabot:
 			Instabot.__LOGGER.warning("{}".format(err))
 			self.cooldown=True
 			self.save_bot()
-			json_data={'username':os.environ.get('username'),'password':os.environ.get('password')}
-			response=requests.post('http://localhost:{}'.format(os.environ.get('port')),json=json_data)
-			Instabot.__NOTIFICATION.send('Local Request Status Code: {}'.format(response.status_code))
-			sys.exit()
+			self.stop_scrape()
 		#Except an unexpected error and exit the program
 		except Exception as err:
 			Instabot.__NOTIFICATION.send(traceback.format_exc(), datetime.now(Instabot.__EST))
 			Instabot.__LOGGER.error(traceback.format_exc())
-			sys.exit()
-		
+	
+	def stop_scrape(self):
+		try:
+			json_data={'username':os.environ.get('username'),'password':os.environ.get('password')}
+			response=requests.post('http://localhost:{}/stop'.format(os.environ.get('port')),json=json_data)
+			Instabot.__LOGGER.debug('Local Request Status Code: {}'.format(response.status_code))
+			Instabot.__NOTIFICATION.send('Local Request Status Code: {}'.format(response.status_code))
+		except Exception as e:
+			Instabot.__LOGGER.error(traceback.format_exc())
+			Instabot.NOTIFICATION.send(traceback.format_exc(),datetime.now(Instabot.__EST))
 
 	def monitor_users(self):
 		if not self.cooldown:
