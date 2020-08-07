@@ -65,6 +65,7 @@ class Instabot:
 			if date_stamp>self.date_stamp:
 				self.date_stamp=date_stamp
 		Instabot.__LOGGER.debug('New Date Stamp: {}'.format(date_stamp))
+		if self.cooldown: self.reset_cooldown()
 		self.save_bot()
 
 	def set_date_user(self,profile):
