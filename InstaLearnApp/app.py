@@ -29,8 +29,7 @@ def create_cronjob():
 		job.minute.every(1)
 
 def get_status(context):
-	with open('bot.pickle','rb') as fv:
-		bot=pickle.load(fv)
+	with open('bot.pickle','rb') as fv: bot=pickle.load(fv)
 	running=False
 	cron=CronTab(user=os.environ.get('user'))
 	for job in cron: running=True
