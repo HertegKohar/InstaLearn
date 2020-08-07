@@ -45,6 +45,7 @@ def stop_cronjob():
 def start_up():
 	stop_cronjob()
 	with open('bot.pickle','rb') as fv: bot=pickle.load(fv)
+	if not bot.cooldown: bot.cooldown=True
 	bot.add_users()
 	create_cronjob()
 
