@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./insta_base.db"
-#If using a server side database would need to connect with a url
+# If using a server side database would need to connect with a url
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
 engine = create_engine(
