@@ -1,2 +1,4 @@
 from .InstaData import Instabot
-bot=Instabot.load_bot()
+
+bot = Instabot.load_bot()
+
