@@ -26,22 +26,6 @@ from .Wheel_Linked import Wheel
 # from Wheel_Linked import Wheel
 # from Instabase import *
 
-# Time wrapper to get the execution time of a function
-def timer(func):
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        exec_time = time.time() - start_time
-        Instabot.__LOGGER.debug(
-            "{} took {} seconds to execute".format(func.__name__, exec_time)
-        )
-        Instabot.__NOTIFICATION.send(
-            "{} took {} seconds to execute".format(func.__name__, exec_time)
-        )
-        return result
-
-    return wrapper
-
 
 class Instabot:
     # Initialize basic logger
@@ -69,6 +53,23 @@ class Instabot:
         self.add_users()
         self.cooldown = False
 
+    # Time wrapper to get the execution time of a function
+    def timer(func):
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            exec_time = time.time() - start_time
+            Instabot.__LOGGER.debug(
+                "{} took {} seconds to execute".format(func.__name__, exec_time)
+            )
+            Instabot.__NOTIFICATION.send(
+                "{} took {} seconds to execute".format(func.__name__, exec_time)
+            )
+            return result
+
+        return wrapper
+
+    @timer
     def test_notification(self):
         Instabot.__NOTIFICATION.send("Testing Notification")
         Instabot.__LOGGER.debug("Testing notification")
