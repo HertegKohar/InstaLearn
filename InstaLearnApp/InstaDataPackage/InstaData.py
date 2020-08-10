@@ -289,20 +289,6 @@ class Instabot:
         shared_data_list = self.extract_data(users)
         insert_db(shared_data_list)
 
-    def collect_users_data_file(self, filename):
-        with open(filename, "r") as fv:
-            fv.seek(0)
-            users = []
-            h_map = {}
-            for line in fv:
-                user = line.strip()
-                if user not in h_map:
-                    users.append(user)
-                    h_map[user] = None
-
-        shared_data_list = self.extract_data(users)
-        insert_db(shared_data_list)
-
     def show_users_data(self, users):
         h_map = {}
         i = 0
