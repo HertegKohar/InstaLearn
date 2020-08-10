@@ -81,6 +81,7 @@ async def status(signin_request: SignIn, background_tasks: BackgroundTasks):
         return get_status({"code": "success"})
     return {"code": "failed"}
 
+
 @app.post("/stop")
 async def stop_cron(signin_request: SignIn, background_tasks: BackgroundTasks):
     if signin_request.username == os.environ.get(
