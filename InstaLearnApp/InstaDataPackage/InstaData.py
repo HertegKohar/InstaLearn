@@ -249,28 +249,6 @@ class Instabot:
             "Exported commenters to file, {}".format(Instabot.__EST)
         )
 
-    def extract_data_i(self, comments, limit=20):
-        for _ in range(limit):
-            try:
-                profile = next(comments).owner
-                info = (
-                    profile.username,
-                    profile.mediacount,
-                    profile.followers,
-                    profile.followees,
-                    int(profile.is_private),
-                    int("@" in str(profile.biography.encode("utf-8"))),
-                    int(profile.external_url is not None),
-                    int(profile.is_verified),
-                )
-                yield info
-                Instabot.__LOGGER.debug("Gathered Info on {}".format(profile.username))
-            except StopIteration:
-                Instabot.__LOGGER.debug("End of the iterator")
-                raise StopIteration
-            except ProfileNotExistsException:
-                Instabot.__LOGGER.debug("Profile not available")
-
     def collect_file_data(self, filename):
         with open(filename, "r") as fv:
             fv.seek(0)
