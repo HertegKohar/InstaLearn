@@ -111,3 +111,14 @@ def query_db(users):
     cursor.close()
     connection.close()
     return df
+
+
+# Returning all entries in table
+def show_all():
+    connection = _connect_db()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM insta_train")
+    l = [output for output in cursor]
+    cursor.close()
+    connection.close()
+    return l
