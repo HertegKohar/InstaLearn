@@ -7,7 +7,12 @@ from InstaDataPackage import Instabase
 
 class TestDBase(unittest.TestCase):
     def test_connection(self):
-        self.assertIsInstance(Instabase._connect_db(), MySQLConnection)
+        connection = Instabase._connect_db()
+        self.assertIsInstance(connection, MySQLConnection)
+        connection.close()
 
     def test_entries(self):
-        self.assertIsInstance(Instabase.show_all(), list)
+        result = Instabase.show_all()
+        self.assertIsInstance(result, list)
+        if not result:
+            self.fail("No Entries in traning table are apprearing")
