@@ -16,6 +16,17 @@ def _connect_db():
     return db_connection
 
 
+# Description of table
+def _description():
+    connection = _connect_db()
+    cursor = connection.cursor()
+    cursor.execute("DESCRIBE insta_train")
+    description = [output for output in cursor]
+    cursor.close()
+    connection.close()
+    return description
+
+
 # Insert data into the database given the processed data
 def insert_db(data):
     connection = _connect_db()
@@ -118,7 +129,7 @@ def show_all():
     connection = _connect_db()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM insta_train")
-    l = [output for output in cursor]
+    entries = [output for output in cursor]
     cursor.close()
     connection.close()
-    return l
+    return entries

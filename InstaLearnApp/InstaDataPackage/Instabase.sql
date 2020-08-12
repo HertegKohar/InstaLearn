@@ -12,13 +12,13 @@ CREATE TABLE insta_train(
 
 SHOW TABLES;
 
-#View all rows
+--View all rows
 SELECT * FROM insta_train;
 
-#Count the rows
+--Count the rows
 SELECT COUNT(*) FROM insta_train;
 
-#Show the variables of the table
+--Show the variables of the table
 DESCRIBE insta_train;
 
 

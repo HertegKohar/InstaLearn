@@ -15,4 +15,4 @@ class TestDBase(unittest.TestCase):
         result = Instabase.show_all()
         self.assertIsInstance(result, list)
         if not result:
-            self.fail("No Entries in traning table are apprearing")
+            self.fail("No entries in training table are apprearing")
