@@ -6,6 +6,11 @@ import os
 # Have to use .commit on database connection to save changes made in script
 # Create a connection instance in order to communicate with the database
 def _connect_db():
+    """Creates a database connection to the MySQL server
+
+    Returns:
+        MySQL Connector: The connection to the MySQL server
+    """
     db_connection = mysql.connector.connect(
         host="localhost",
         user=os.environ.get("DB_USER"),
@@ -18,6 +23,11 @@ def _connect_db():
 
 # Description of table
 def _description():
+    """Gives a description of the database table
+
+    Returns:
+        List[Table Attributes]: List of table attributes
+    """
     connection = _connect_db()
     cursor = connection.cursor()
     cursor.execute("DESCRIBE insta_train")
@@ -27,8 +37,12 @@ def _description():
     return description
 
 
-# Insert data into the database given the processed data
 def insert_db(data):
+    """Inserts user data into the database table
+
+    Args:
+        data (List[Tuple(String)]): List of user data
+    """
     connection = _connect_db()
     cursor = connection.cursor()
     add_info = (
@@ -52,8 +66,12 @@ def insert_db(data):
     connection.close()
 
 
-# Return the number of rows in the database
 def size():
+    """Returns the amount of rows in the database table
+
+    Returns:
+        Integer: Number of rows in database table
+    """
     connection = _connect_db()
     cursor = connection.cursor()
     cursor.execute("SELECT COUNT(*) FROM insta_train")
@@ -64,8 +82,15 @@ def size():
     return rows
 
 
-# Search the data base and show the results of the row or return a row of unavailable columns
 def search_db(users):
+    """Queries the database for users and returns their data
+
+    Args:
+        users (List[String]): List of usernames
+
+    Returns:
+        Pandas Dataframe: Table of all the users queried rows with data if found
+    """
     connection = _connect_db()
     cursor = connection.cursor()
     pd.set_option("display.max_columns", None)
@@ -105,8 +130,15 @@ def search_db(users):
     return df
 
 
-# Quert and return True or False to whether the user in the in the database
 def query_db(users):
+    """Searches the database table for users
+
+    Args:
+        users (List[String]): List of usernames to search for
+
+    Returns:
+        Pandas DataFrame: Table of whether the users are in the database table
+    """
     connection = _connect_db()
     cursor = connection.cursor()
     df = pd.DataFrame(columns=["User", "Found"])
@@ -124,8 +156,12 @@ def query_db(users):
     return df
 
 
-# Returning all entries in table
 def show_all():
+    """Shows all the entries in the database table
+
+    Returns:
+        List[Tuple(User Data)]: A list of all user data within the table
+    """
     connection = _connect_db()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM insta_train")
