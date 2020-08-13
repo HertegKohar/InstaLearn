@@ -6,6 +6,7 @@ import requests
 
 class TestApp(unittest.TestCase):
     def test_status(self):
+        raise NotImplementedError
         json_data = {
             "username": os.environ["username"],
             "password": os.environ["password"],
@@ -13,4 +14,3 @@ class TestApp(unittest.TestCase):
         response = requests.post(
             url="{var['ip']}:{var['port']}".format(var=os.environ), json=json_data
         )
-        raise NotImplementedError
