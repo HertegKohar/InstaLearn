@@ -5,8 +5,8 @@ import requests
 
 
 class TestApp(unittest.TestCase):
+    @unittest.skip("Status Response Test Not Implemented Yet")
     def test_status(self):
-        raise NotImplementedError
         json_data = {
             "username": os.environ["username"],
             "password": os.environ["password"],
