@@ -202,7 +202,7 @@ class Instabot:
         """
 		Create a ThreadPoolExecutor instance in order to create seperate request for each user's information
 		Pass the extract_data function into the executor and loop through the results 
-		Take the processed information and write it into the csv
+		Take the processed information and insert into local database
 		"""
         with concurrent.futures.ThreadPoolExecutor() as executor:
             shared_data_list = []
@@ -214,14 +214,13 @@ class Instabot:
             except StopIteration:
                 Instabot.__LOGGER.debug("End of comment iterator")
             finally:
-                with open("InstaData.csv", "a") as fv:
+                with DB_Session_Local() as db:
                     for shared_data in concurrent.futures.as_completed(
                         shared_data_list
                     ):
                         try:
-                            info = ",".join(shared_data.result())
-                            fv.write(info + "\n")
-                            Instabot.__LOGGER.debug("Wrote user info to file")
+                            db.insert(shared_data.result())
+                            Instabot.__LOGGER.debug("Inserted User into database")
                         except ProfileNotExistsException:
                             Instabot.__LOGGER.debug("Profile not available")
 
@@ -229,13 +228,13 @@ class Instabot:
     def extract_data(self, profile):
         info = (
             profile.username,
-            str(profile.mediacount),
-            str(profile.followers),
-            str(profile.followees),
-            str(int(profile.is_private)),
-            str(int("@" in str(profile.biography.encode("utf-8")))),
-            str(int(profile.external_url is not None)),
-            str(int(profile.is_verified)),
+            profile.mediacount,
+            profile.followers,
+            profile.followees,
+            int(profile.is_private),
+            int("@" in str(profile.biography.encode("utf-8"))),
+            int(profile.external_url is not None),
+            int(profile.is_verified),
         )
         return info
 

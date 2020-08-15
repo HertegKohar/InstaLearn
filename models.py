@@ -20,5 +20,6 @@ class Account(Base):
     following = Column(Integer)
     private = Column(Boolean)
     bio_tag = Column(Boolean)
+    external_url = Column(Boolean)
     verified = Column(Boolean)
 

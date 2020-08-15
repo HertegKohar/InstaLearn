@@ -2,6 +2,36 @@ import mysql.connector
 import pandas as pd
 from mysql.connector.errors import IntegrityError
 import os
+import sqlite3
+
+
+class DB_Session_Local:
+    def __init__(self):
+        pass
+
+    def __enter__(self):
+        self.__connection = sqlite3.connect("instabase.db")
+        self.__cursor = self.__connection.cursor()
+        return self
+
+    def __exit__(self, exc_type, exc_val, traceback):
+        self.__cursor.close()
+        self.__connection.close()
+
+    def insert(self, data):
+        self.__cursor.execute(
+            """INSERT INTO accounts VALUES('{info[0]}',{info[1]},{info[2]},
+            {info[3]},{info[4]},{info[5]},{info[6]},{info[7]}) """.format(
+                info=data
+            )
+        )
+        self.__connection.commit()
+
+    def show(self):
+        self.__cursor.execute("SELECT * FROM accounts")
+        for output in self.__cursor:
+            print(output)
+
 
 # Have to use .commit on database connection to save changes made in script
 # Create a connection instance in order to communicate with the database
@@ -41,18 +71,18 @@ def insert_db(data):
     """Inserts user data into the database table
 
     Args:
-        data (List[Tuple(String)]): List of user data
+        data (List[Tuple(User Data)]): List of user data
     """
     connection = _connect_db()
     cursor = connection.cursor()
-    add_info = (
-        "INSERT INTO insta_train "
-        "(username, posts, followers, following, private, bio_tag, external_url, verified) "
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-    )
     for info in data:
         try:
-            cursor.execute(add_info, info)
+            cursor.execute(
+                """INSERT INTO insta_train VALUES('{info[0]}',{info[1]},{info[2]},
+            {info[3]},{info[4]},{info[5]},{info[6]},{info[7]}) """.format(
+                    info=info
+                )
+            )
         except IntegrityError:
             cursor.execute(
                 """ UPDATE insta_train SET posts={d[1]}, followers={d[2]}, following={d[3]}, private={d[4]}, 
