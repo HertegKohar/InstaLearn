@@ -20,7 +20,7 @@ from instaloader.exceptions import (
 from notify_run import Notify
 from pytz import timezone
 
-from .Instabase import *
+from .Instabase import DB_Session, DB_Session_Local
 from .Wheel_Linked import Wheel
 
 # from Wheel_Linked import Wheel
@@ -261,6 +261,10 @@ class Instabot:
         insert_db(shared_data_list)
         print(size())
 
+    def collect_data(self):
+        with DB_Session_Local() as db:
+            pass
+
     def collect_users_data(self, users):
         shared_data_list = []
         shared_data_list = self.extract_data(users)
@@ -281,16 +285,3 @@ class Instabot:
     # Query the database to see if a user is within it
     def query(self, users):
         print(query_db(users))
-
-    def show_users_data_file(self, filename):
-        with open(filename, "r") as fv:
-            fv.seek(0)
-            h_map = {}
-            users = []
-            for line in fv:
-                user = line.strip()
-                if user not in h_map:
-                    users.append(user)
-                    h_map[user] = None
-        print(search_db(users))
-
