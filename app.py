@@ -104,11 +104,12 @@ async def run_cron(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    user = db.query(User)
-    user = user.filter(User.username == signin_request.username).filter(
-        User.password == signin_request.password
+    users = db.query(User)
+    user = (
+        users.filter(User.username == signin_request.username)
+        .filter(User.password == signin_request.password)
+        .first()
     )
-    user = user.all()
     if user:
         background_tasks.add_task(start_up)
         return {"code": "success"}
@@ -121,11 +122,12 @@ async def status(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    user = db.query(User)
-    user = user.filter(User.username == signin_request.username).filter(
-        User.password == signin_request.password
+    users = db.query(User)
+    user = (
+        users.filter(User.username == signin_request.username)
+        .filter(User.password == signin_request.password)
+        .first()
     )
-    user = user.all()
     if user:
         return get_status({"code": "success"})
 
@@ -138,12 +140,30 @@ async def stop_cron(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    user = db.query(User)
-    user = user.filter(User.username == signin_request.username).filter(
-        User.password == signin_request.password
+    users = db.query(User)
+    user = (
+        users.filter(User.username == signin_request.username)
+        .filter(User.password == signin_request.password)
+        .first()
     )
-    user = user.all()
     if user:
         background_tasks.add_task(stop_cronjob)
         return {"code": "success"}
     return {"code": "failed"}
+
+
+@app.post("/stats")
+async def stats(
+    signin_request: SignIn,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    users = db.query(User)
+    user = (
+        users.filter(User.username == signin_request.username)
+        .filter(User.password == signin_request.password)
+        .first()
+    )
+    if user:
+        return {"code": "success", "entries": db.query(Account).count()}
+    return {"code": "fail"}
