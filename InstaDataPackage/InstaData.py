@@ -212,7 +212,7 @@ class Instabot:
                         executor.submit(self.extract_data, next(comments).owner)
                     )
             except StopIteration:
-                Instabot.__LOGGER.debug("End of comment iterator")
+                Instabot.__LOGGER.debug("End of comment generator")
             finally:
                 with DB_Session_Local() as db:
                     for shared_data in concurrent.futures.as_completed(

@@ -1,8 +1,9 @@
+import os
+import sqlite3
+
 import mysql.connector
 import pandas as pd
 from mysql.connector.errors import IntegrityError
-import os
-import sqlite3
 
 
 class DB_Session_Local:
@@ -19,18 +20,35 @@ class DB_Session_Local:
         self.__connection.close()
 
     def insert(self, data):
-        self.__cursor.execute(
-            """INSERT INTO accounts VALUES('{info[0]}',{info[1]},{info[2]},
-            {info[3]},{info[4]},{info[5]},{info[6]},{info[7]}) """.format(
-                info=data
+        try:
+            self.__cursor.execute(
+                """INSERT INTO accounts VALUES('{info[0]}',{info[1]},{info[2]},
+                {info[3]},{info[4]},{info[5]},{info[6]},{info[7]}) """.format(
+                    info=data
+                )
             )
-        )
-        self.__connection.commit()
+        except sqlite3.IntegrityError:
+            self.__cursor.execute(
+                """ UPDATE accounts SET posts={d[1]}, followers={d[2]}, following={d[3]}, private={d[4]},
+        		bio_tag={d[5]}, external_url={d[6]}, verified={d[7]} WHERE username='{d[0]}'""".format(
+                    d=data
+                )
+            )
+        finally:
+            self.__connection.commit()
 
     def show(self):
         self.__cursor.execute("SELECT * FROM accounts")
         for output in self.__cursor:
             print(output)
+
+    def size(self):
+        self.__cursor.execute("SELECT COUNT(*) FROM accounts")
+        for output in self.__cursor:
+            print("Accounts: {}".format(output))
+        self.__cursor.execute("SELECT COUNT(*) FROM users")
+        for output in self.__cursor:
+            print("Users: {}".format(output))
 
 
 # Have to use .commit on database connection to save changes made in script
