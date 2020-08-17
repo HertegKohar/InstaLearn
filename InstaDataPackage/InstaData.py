@@ -258,17 +258,20 @@ class Instabot:
                 if info[0] not in h_map:
                     shared_data_list.append(tuple(info))
                     h_map[info[0]] = None
-        insert_db(shared_data_list)
-        print(size())
+        with DB_Session() as db:
+            for shared_data in shared_data_list:
+                db.insert(shared_data)
+                print(db.size())
 
     def collect_data(self):
         with DB_Session_Local() as db:
-            pass
+            db.transfer()
 
     def collect_users_data(self, users):
-        shared_data_list = []
-        shared_data_list = self.extract_data(users)
-        insert_db(shared_data_list)
+        shared_data_list = [self.extract_data(user) for user in users]
+        with DB_Session() as db:
+            for shared_data in shared_data_list:
+                db.insert(shared_data)
 
     def show_users_data(self, users):
         h_map = {}
@@ -279,9 +282,10 @@ class Instabot:
             else:
                 h_map[users[i]] = None
                 i += 1
-
-        print(search_db(users))
+        with DB_Session() as db:
+            print(db.search(users))
 
     # Query the database to see if a user is within it
     def query(self, users):
-        print(query_db(users))
+        with DB_Session() as db:
+            print(db.query(users))
