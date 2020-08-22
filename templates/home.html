@@ -1,5 +1,32 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>InstaLearn</h2>
-{{ date_stamp }}
+<table class="ui celled table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Posts</th>
+            <th>Followers</th>
+            <th>Following</th>
+            <th>Private</th>
+            <th>Bio Tag</th>
+            <th>External Url</th>
+            <th>Verified</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for account in accounts %}
+        <tr>
+            <td>{{ account.username }}</td>
+            <td>{{ account.posts }}</td>
+            <td>{{ account.followers }}</td>
+            <td>{{ account.following }}</td>
+            <td>{{ account.private }}</td>
+            <td>{{ account.bio_tag }}</td>
+            <td>{{ account.external_url }}</td>
+            <td>{{ account.verified }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
