@@ -76,10 +76,11 @@ def get_status(context):
     for _ in cron:
         running = True
     d = {
-        "cooldown": str(bot.cooldown),
-        "date_stamp": str(bot.date_stamp),
+        "cooldown": bot.cooldown,
+        "date_stamp": bot.date_stamp,
         "current_user": bot.users.peek(),
-        "running": str(running),
+        "running": running,
+        "stop_date": bot.stop_date,
     }
     context.update(d)
     return context
@@ -166,4 +167,4 @@ async def stats(
     )
     if user:
         return {"code": "success", "entries": db.query(Account).count()}
-    return {"code": "fail"}
+    return {"code": "failed"}

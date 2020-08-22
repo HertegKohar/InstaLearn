@@ -89,6 +89,7 @@ class Instabot:
         Instabot.__LOGGER.debug("New Date Stamp: {}".format(date_stamp))
         if self.cooldown:
             self.reset_cooldown()
+        self.stop_date = None
         self.save_bot()
 
     def set_date_user(self, profile):
@@ -159,6 +160,7 @@ class Instabot:
             )
             Instabot.__LOGGER.warning("{}".format(err))
             self.cooldown = True
+            self.stop_date = datetime.now(Instabot.__EST)
             self.save_bot()
             self.stop_scrape()
         # Except an unexpected error and exit the program
@@ -261,7 +263,7 @@ class Instabot:
         with DB_Session() as db:
             for shared_data in shared_data_list:
                 db.insert(shared_data)
-                print(db.size())
+            print(db.size())
 
     def collect_data(self):
         with DB_Session_Local() as db:
