@@ -45,6 +45,8 @@ class DB_Session_Local:
             print(db.size())
         self.__cursor.execute("DELETE FROM accounts")
         self.__connection.commit()
+        self.__cursor.execute("vacuum")
+        self.__connection.commit()
 
     def show(self):
         self.__cursor.execute("SELECT * FROM accounts")
