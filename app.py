@@ -13,6 +13,7 @@ from database import SessionLocal, engine
 from models import Account, User
 
 # Create a FastAPI instance
+# redoc_url=None, docs_url=None
 app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
@@ -43,7 +44,13 @@ templates = Jinja2Templates(directory="templates")
 def home(request: Request, db: Session = Depends(get_db)):
     accounts = db.query(Account)
     return templates.TemplateResponse(
-        "home.html", {"request": request, "accounts": accounts}
+        "home.html",
+        {
+            "request": request,
+            "accounts": accounts,
+            "count": accounts.count(),
+            "status": get_status(),
+        },
     )
 
 
@@ -71,7 +78,7 @@ def create_cronjob():
         job.minute.every(1)
 
 
-def get_status(context):
+def get_status(context=None):
     with open("bot.pickle", "rb") as fv:
         bot = pickle.load(fv)
     running = False
@@ -85,8 +92,10 @@ def get_status(context):
         "running": running,
         "stop_date": bot.stop_date,
     }
-    context.update(d)
-    return context
+    if context:
+        context.update(d)
+        return context
+    return d
 
 
 def stop_cronjob():

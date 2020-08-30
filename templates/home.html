@@ -1,6 +1,85 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>InstaLearn</h2>
+<script>
+    $(document).ready(function () {
+        $("#runBtn").click(function () {
+            console.log('Sign In Modal');
+            $('.ui.modal').modal('show');
+        });
+
+        $("#run").click(function () {
+            $.ajax({
+                url: '/run',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    "username": $("[name='username']").val(),
+                    "password": $("[name='password']").val()
+                }),
+                dataType: 'json'
+            });
+
+
+        });
+
+    });
+</script>
+
+<div class="ui message">
+    <div class="header">
+        Status
+    </div>
+    <ul class="list">
+        <li>Cooldown: {{ status['cooldown'] }}</li>
+        <li>Latest Post: {{ status['date_stamp']}}</li>
+        <li>Current Account: {{ status['current_user']}}</li>
+        <li>Running: {{ status['running'] }}</li>
+        <li>Stop Date: {{ status['stop_date'] }}</li>
+    </ul>
+</div>
+<div class="ui statistic">
+    <div class="value">
+        {{ count }}
+    </div>
+    <div class="label">
+        Local Entries
+    </div>
+</div>
+
+
+<span style="padding-left: 40px;">
+    <div style="text-align:center" class="ui primary button" id="runBtn" {% if status['running'] %} disabled
+        {% endif %}>
+        Run &nbsp; <i class="power off icon"></i>
+    </div>
+</span>
+
+<div class="ui modal">
+    <i class="close icon"></i>
+    <div class="header">
+        User Sign In
+    </div>
+    <div class="content">
+        <form class="ui form" id="sigin">
+            <div class="field">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Username">
+            </div>
+            <div class="Password">
+                <label>Username</label>
+                <input type="password" name="password" placeholder="Password">
+            </div>
+        </form>
+    </div>
+    <div class="actions">
+        <div id="run" class="ui positive right labeled icon button">
+            Run
+            <i class="check icon"></i>
+        </div>
+    </div>
+</div>
+
 <table class="ui celled table">
     <thead>
         <tr>
