@@ -19,7 +19,6 @@ from instaloader.exceptions import (
 )
 from notify_run import Notify
 from pytz import timezone
-
 from .Instabase import DB_Session, DB_Session_Local
 from .Wheel_Linked import Wheel
 

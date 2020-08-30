@@ -3,3 +3,7 @@ uvicorn
 jinja2
 sqlalchemy
 python-crontab
+notify-run
+pytz
+instaloader
+pandas
