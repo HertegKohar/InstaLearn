@@ -11,7 +11,7 @@ class TestApp(unittest.TestCase):
             "password": os.environ["password"],
         }
         response = requests.post(
-            url="http://{var[ip]}:{var[port]}/status".format(var=os.environ),
+            url=f"http://{os.environ.get('ip')}:{os.environ.get('port')}/status",
             json=json_data,
         )
         if response.json()["code"] == "fail":
@@ -23,7 +23,7 @@ class TestApp(unittest.TestCase):
             "password": os.environ.get("password"),
         }
         response = requests.post(
-            url="http://{var[ip]}:{var[port]}/add_user".format(var=os.environ),
+            url=f"http://{os.environ.get('ip')}:{os.environ.get('port')}/add_user",
             json=json_data,
         )
         if response.json()["code"] == "success":

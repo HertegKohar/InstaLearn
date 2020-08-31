@@ -59,10 +59,10 @@ class Instabot:
             result = func(*args, **kwargs)
             exec_time = time.time() - start_time
             Instabot.__LOGGER.debug(
-                "{} took {} seconds to execute".format(func.__name__, exec_time)
+                f"{func.__name__} took {exec_time} seconds to execute"
             )
             Instabot.__NOTIFICATION.send(
-                "{} took {} seconds to execute".format(func.__name__, exec_time)
+                f"{func.__name__} took {exec_time} seconds to execute"
             )
             return result
 
@@ -70,8 +70,8 @@ class Instabot:
 
     @timer
     def test_notification(self):
-        Instabot.__NOTIFICATION.send("Testing Notification")
         Instabot.__LOGGER.debug("Testing notification")
+        Instabot.__NOTIFICATION.send("Testing Notification")
 
     def add_users(self):
         users = Profile.from_username(
@@ -81,11 +81,11 @@ class Instabot:
             self.users.clear()
         for user in users:
             self.users.add(user.username)
-            Instabot.__LOGGER.debug("Added User {}".format(user.username))
+            Instabot.__LOGGER.debug(f"Added User {user.username}")
             date_stamp = self.set_date_user(user)
             if date_stamp > self.date_stamp:
                 self.date_stamp = date_stamp
-        Instabot.__LOGGER.debug("New Date Stamp: {}".format(date_stamp))
+        Instabot.__LOGGER.debug(f"New Date Stamp: {date_stamp}")
         if self.cooldown:
             self.reset_cooldown()
         self.stop_date = None
@@ -148,26 +148,24 @@ class Instabot:
         # If the post is unavailable send a notification and save the bot
         except QueryReturnedNotFoundException as err:
             Instabot.__NOTIFICATION.send("404 Error Code")
-            Instabot.__LOGGER.warning("{}".format(err))
+            Instabot.__LOGGER.warning(f"{err}")
 
         # If too many requests has been sent reset cooldown and save
         except ConnectionException as err:
             Instabot.__NOTIFICATION.send(
-                "Can't get info on post need to cool down, {}".format(
-                    datetime.now(Instabot.__EST)
-                )
+                f"Can't get info on post need to cool down, {datetime.now(Instabot.__EST)}"
             )
-            Instabot.__LOGGER.warning("{}".format(err))
+            Instabot.__LOGGER.warning(f"{err}")
             self.cooldown = True
             self.stop_date = datetime.now(Instabot.__EST)
             self.save_bot()
             self.stop_scrape()
         # Except an unexpected error and exit the program
         except Exception as err:
-            Instabot.__NOTIFICATION.send(
-                traceback.format_exc(), datetime.now(Instabot.__EST)
-            )
             Instabot.__LOGGER.error(traceback.format_exc())
+            Instabot.__NOTIFICATION.send(
+                f"{traceback.format_exc()},{datetime.now(Instabot.__EST)}"
+            )
 
     def stop_scrape(self):
         try:
@@ -176,19 +174,18 @@ class Instabot:
                 "password": os.environ.get("password"),
             }
             response = requests.post(
-                "http://localhost:{}/stop".format(os.environ.get("port")),
-                json=json_data,
+                f"http://localhost:{os.environ.get('port')}/stop", json=json_data,
             )
             Instabot.__LOGGER.debug(
-                "Local Request Status Code: {}".format(response.status_code)
+                f"Local Request Status Code: {response.status_code}"
             )
             Instabot.__NOTIFICATION.send(
-                "Local Request Status Code: {}".format(response.status_code)
+                f"Local Request Status Code: {response.status_code}"
             )
         except Exception as _:
             Instabot.__LOGGER.error(traceback.format_exc())
             Instabot.__NOTIFICATION.send(
-                traceback.format_exc(), datetime.now(Instabot.__EST)
+                f"{traceback.format_exc()},{datetime.now(Instabot.__EST)}"
             )
 
     def monitor_users(self):
@@ -246,7 +243,7 @@ class Instabot:
                 info = info.replace(" ", "")
                 fv.write(info + "\n")
         Instabot.__NOTIFICATION.send(
-            "Exported commenters to file, {}".format(Instabot.__EST)
+            f"Exported commenters to file, {datetime.now(Instabot.__EST)}"
         )
 
     def collect_file_data(self, filename):
