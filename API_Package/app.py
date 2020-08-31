@@ -8,15 +8,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from crontab import CronTab
-import models
-from database import SessionLocal, engine
-from models import Account, User
+from .database import SessionLocal, engine
+from .models import Account, User, Base
 
 # Create a FastAPI instance
 # redoc_url=None, docs_url=None
 app = FastAPI()
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 
 class SignIn(BaseModel):
