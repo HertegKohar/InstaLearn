@@ -70,10 +70,14 @@ class Instabot:
 
     @timer
     def test_notification(self):
+        """Tests the notification channel
+        """
         Instabot.__LOGGER.debug("Testing notification")
         Instabot.__NOTIFICATION.send("Testing Notification")
 
     def add_users(self):
+        """Adds the followers of the account and changes the date stamp to the most recent post
+        """
         users = Profile.from_username(
             self.__I_session.context, os.environ.get("IG_USER")
         ).get_followees()
@@ -91,7 +95,15 @@ class Instabot:
         self.stop_date = None
         self.save_bot()
 
-    def set_date_user(self, profile):
+    def set_date_user(self, profile: Profile):
+        """Obtains the latest post of the profile given and returns the date stamp of the post in UTC
+
+        Args:
+            profile (Profile): The profile to find the latest post of 
+
+        Returns:
+            datetime: The UTC date stamp of the profiles latest post
+        """
         date_stamp = next(profile.get_posts()).date_utc
         return date_stamp
 
@@ -111,6 +123,11 @@ class Instabot:
     # Load the bot from a pickle file
     @staticmethod
     def load_bot():
+        """Loads the saved Instabot object from the pickle file
+
+        Returns:
+            Instabot: Saved Instabot object from pickle file
+        """
         with open("bot.pickle", "rb") as pickle_in:
             bot = pickle.load(pickle_in)
         Instabot.__LOGGER.debug("Loaded Bot")
@@ -118,6 +135,8 @@ class Instabot:
 
     # Save the bot to a pickle file
     def save_bot(self):
+        """Saves the Instabot object to the pickle file for next use
+        """
         with open("bot.pickle", "wb") as pickle_out:
             pickle.dump(self, pickle_out, protocol=pickle.HIGHEST_PROTOCOL)
         Instabot.__LOGGER.debug("Exported to pickle file")
@@ -128,10 +147,24 @@ class Instabot:
         size = file_stats.st_size / (1024 * 1024)
         return size
 
-    def get_profile(self, user):
+    def get_profile(self, user: str):
+        """Returns the profile of the given username
+
+        Args:
+            user (str): The username of the profile to be returned
+
+        Returns:
+            instaloader.Profile: The profile of the username given
+        """
         return Profile.from_username(self.__I_session.context, user)
 
-    def monitor_user(self, user):
+    def monitor_user(self, user: str):
+        """Checks to see if the date stamp of the users most recent post is greater than the current
+        held date stamp, if so then the data of the commenters of the post will be collected
+
+        Args:
+            user (str): The username of the profile to be accessed
+        """
         try:
             profile = self.get_profile(user)
             post = next(profile.get_posts())
@@ -168,6 +201,8 @@ class Instabot:
             )
 
     def stop_scrape(self):
+        """Sends a request to stop the cronjob the local machine
+        """
         try:
             json_data = {
                 "username": os.environ.get("username"),
@@ -189,6 +224,9 @@ class Instabot:
             )
 
     def monitor_users(self):
+        """Goes the saved followers usernames and rotates each time to see the date stamp of their
+        most recent post
+        """
         if not self.cooldown:
             user = self.users.get_next()
             self.monitor_user(user)
@@ -197,11 +235,14 @@ class Instabot:
 
     @timer
     def commenters(self, comments, limit=20):
-        """
-		Create a ThreadPoolExecutor instance in order to create seperate request for each user's information
+        """Create a ThreadPoolExecutor instance in order to create seperate request for each user's information
 		Pass the extract_data function into the executor and loop through the results 
 		Take the processed information and insert into local database
-		"""
+
+        Args:
+            comments (Iterator[PostCommentAnswer]): A generator of comments for a post 
+            limit (int, optional): The amount of commenters to extract data from. Defaults to 20.
+        """
         with concurrent.futures.ThreadPoolExecutor() as executor:
             shared_data_list = []
             try:
@@ -222,8 +263,15 @@ class Instabot:
                         except ProfileNotExistsException:
                             Instabot.__LOGGER.debug("Profile not available")
 
-    # Helper method to process data
-    def extract_data(self, profile):
+    def extract_data(self, profile: Profile):
+        """Helper method to extract the data from the given profile
+
+        Args:
+            profile (Profile): The given profile to extract data from
+
+        Returns:
+            tuple: A tuple of the processed info from the profile
+        """
         info = (
             profile.username,
             profile.mediacount,

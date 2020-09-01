@@ -86,17 +86,17 @@ class DB_Session:
         """Gives a description of the database table
 
         Returns:
-            List[Table Attributes]: List of table attributes
+            list: List of table attributes
         """
         self.__cursor.execute("DESCRIBE insta_train")
         description = [output for output in self.__cursor]
         return description
 
-    def insert(self, data):
-        """Inserts user data into the database table
+    def insert(self, data: tuple):
+        """Inserts user data in database
 
         Args:
-            data: Tuple(User Data): Processed user data
+            data (tuple): A tuple of user information
         """
         try:
             self.__cursor.execute(
@@ -119,21 +119,22 @@ class DB_Session:
         """Returns the amount of rows in the database table
 
         Returns:
-            Integer: Number of rows in database table
+            int: Number of rows in database table
         """
         self.__cursor.execute("SELECT COUNT(*) FROM insta_train")
         for output in self.__cursor:
             rows = output[0]
         return rows
 
-    def search(self, users):
-        """Queries the database for users and returns their data
+    def query(self, users: list):
+        """Queries and returns user data for the list of users
 
         Args:
-            users (List[String]): List of usernames
+            users (list): A list of usernames
 
         Returns:
-            Pandas Dataframe: Table of all the users queried rows with data if found
+            pd.DataFrame: A dataframe of a table which resembles the database table 
+            of the user information queried for
         """
         pd.set_option("display.max_columns", None)
         df = pd.DataFrame(
@@ -171,14 +172,14 @@ class DB_Session:
                 df = df.append({"User": user}, ignore_index=True)
         return df
 
-    def query(self, users):
+    def query_found(self, users: list):
         """Searches the database table for users
 
         Args:
-            users (List[String]): List of usernames to search for
+            users (list): List of usernames to search for
 
         Returns:
-            Pandas DataFrame: Table of whether the users are in the database table
+            pd.DataFrame: Table of whether the users are in the database table
         """
         df = pd.DataFrame(columns=["User", "Found"])
         for user in users:
@@ -198,7 +199,7 @@ class DB_Session:
         """Shows all the entries in the database table
 
         Returns:
-            List[Tuple(User Data)]: A list of all user data within the table
+            list: A list of all user data within the table
         """
         self.__cursor.execute("SELECT * FROM insta_train")
         entries = [output for output in self.__cursor]
