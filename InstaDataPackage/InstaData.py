@@ -16,6 +16,7 @@ from instaloader.exceptions import (
     ProfileNotExistsException,
     QueryReturnedNotFoundException,
     ConnectionException,
+    QueryReturnedBadRequestException,
 )
 from notify_run import Notify
 from pytz import timezone
@@ -183,6 +184,16 @@ class Instabot:
             Instabot.__NOTIFICATION.send("404 Error Code")
             Instabot.__LOGGER.warning(f"{err}")
 
+        except QueryReturnedBadRequestException as err:
+            Instabot.__LOGGER.warning(f"{err}")
+            Instabot.__NOTIFICATION.send(
+                f"Verification needed to access Instagram {datetime.now(Instabot.__EST)}"
+            )
+            self.cooldown = True
+            self.stop_date = datetime.now(Instabot.__EST)
+            self.save_bot()
+            self.stop_scrape()
+
         # If too many requests has been sent reset cooldown and save
         except ConnectionException as err:
             Instabot.__NOTIFICATION.send(
@@ -229,6 +240,7 @@ class Instabot:
         """
         if not self.cooldown:
             user = self.users.get_next()
+            Instabot.__LOGGER.debug(f"Monitoring {user}")
             self.monitor_user(user)
         else:
             Instabot.__LOGGER.warning("429 Need to cooldown")
@@ -329,9 +341,9 @@ class Instabot:
                 h_map[users[i]] = None
                 i += 1
         with DB_Session() as db:
-            print(db.search(users))
+            print(db.query(users))
 
     # Query the database to see if a user is within it
     def query(self, users):
         with DB_Session() as db:
-            print(db.query(users))
+            print(db.query_found(users))
