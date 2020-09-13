@@ -1,9 +1,11 @@
 import os
 import sqlite3
 
+import gspread
 import mysql.connector
 import pandas as pd
 from mysql.connector.errors import IntegrityError
+
 
 # Have to use .commit on database connection to save changes made in script
 class DB_Session_Local:
@@ -19,7 +21,12 @@ class DB_Session_Local:
         self.__cursor.close()
         self.__connection.close()
 
-    def insert(self, data):
+    def insert(self, data: tuple):
+        """Takes a list of data to be inserted into the local database
+
+        Args:
+            data (tuple): List of data for a user
+        """
         try:
             self.__cursor.execute(
                 """INSERT INTO accounts VALUES('{info[0]}',{info[1]},{info[2]},
@@ -37,7 +44,10 @@ class DB_Session_Local:
         finally:
             self.__connection.commit()
 
-    def transfer(self):
+    def transfer_to_server(self):
+        """Takes the entries from the local database and inserts them into the MySQL
+        database then resizes the local database
+        """
         self.__cursor.execute("SELECT * FROM accounts")
         with DB_Session() as db:
             for info in self.__cursor:
@@ -48,18 +58,62 @@ class DB_Session_Local:
         self.__cursor.execute("vacuum")
         self.__connection.commit()
 
-    def show(self):
+    def transfer_to_sheet(self):
         self.__cursor.execute("SELECT * FROM accounts")
-        for output in self.__cursor:
-            print(output)
+        with DB_Session_Sheets() as sheet:
+            sheet.insert([output for output in self.__cursor])
+        self.__cursor.execute("DELETE FROM accounts")
+        self.__connection.commit()
+        self.__cursor.execute("vacuum")
+        self.__connection.commit()
+
+    def show(self):
+        """Shows the entries for the account data collected
+        """
+        self.__cursor.execute("SELECT * FROM accounts")
+        return [output for output in self.__cursor]
 
     def size(self):
+        """Shows the number of entries for the user data and the account data
+        """
         self.__cursor.execute("SELECT COUNT(*) FROM accounts")
         for output in self.__cursor:
             print("Accounts: {}".format(output))
         self.__cursor.execute("SELECT COUNT(*) FROM users")
         for output in self.__cursor:
             print("Users: {}".format(output))
+
+
+class DB_Session_Sheets:
+    def __init__(self):
+        pass
+
+    def __enter__(self):
+        self.__gc = gspread.service_account(filename="credentials.json")
+        self.__sh = self.__gc.open_by_key(os.environ.get("SHEET_KEY"))
+        self.__worksheet = self.__sh.sheet1
+        return self
+
+    def __exit__(self, exc_type, exc_val, traceback):
+        pass
+
+    def insert(self, data: list):
+        self.__worksheet.insert_rows(data, 2)
+
+    def clean(self):
+        rows = self.__worksheet.get_all_values()
+        i = 1
+        h_map = {}
+        while i < len(rows):
+            if rows[i][0] in h_map:
+                self.__worksheet.delete_row(i + 1)
+                rows.pop(i)
+            else:
+                h_map[rows[i][0]] = None
+                i += 1
+
+    def show(self):
+        return self.__worksheet.get_all_values()
 
 
 class DB_Session:
