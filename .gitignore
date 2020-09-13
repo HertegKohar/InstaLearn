@@ -4,3 +4,4 @@ bot.pickle
 logging.txt
 server.txt
 instabase.db
+credentials.json
