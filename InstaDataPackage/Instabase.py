@@ -44,6 +44,19 @@ class DB_Session_Local:
         finally:
             self.__connection.commit()
 
+    def backup(self):
+        self.__cursor.execute("SELECT * FROM accounts")
+        entries = [output for output in self.__cursor]
+        with DB_Session() as db:
+            for info in entries:
+                db.insert(info)
+        with DB_Session_Sheets() as sheet:
+            sheet.insert(entries)
+        self.__cursor.execute("DELETE FROM accounts")
+        self.__connection.commit()
+        self.__cursor.execute("vacuum")
+        self.__connection.commit()
+
     def transfer_to_server(self):
         """Takes the entries from the local database and inserts them into the MySQL
         database then resizes the local database
@@ -99,18 +112,6 @@ class DB_Session_Sheets:
 
     def insert(self, data: list):
         self.__worksheet.insert_rows(data, 2)
-
-    def clean(self):
-        rows = self.__worksheet.get_all_values()
-        i = 1
-        h_map = {}
-        while i < len(rows):
-            if rows[i][0] in h_map:
-                self.__worksheet.delete_row(i + 1)
-                rows.pop(i)
-            else:
-                h_map[rows[i][0]] = None
-                i += 1
 
     def show(self):
         return self.__worksheet.get_all_values()
