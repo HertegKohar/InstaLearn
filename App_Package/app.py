@@ -74,7 +74,7 @@ async def add_user(
 def create_cronjob():
     with CronTab(user=os.environ.get("user")) as cron:
         job = cron.new(command="python3 cronjob.py", comment="Scrape")
-        job.minute.every(1)
+        job.minute.every(5)
 
 
 def get_status(context=None):

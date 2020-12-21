@@ -20,7 +20,7 @@ from instaloader.exceptions import (
 )
 from notify_run import Notify
 from pytz import timezone
-from .Instabase import DB_Session, DB_Session_Local
+from .Instabase import DB_Session, DB_Session_Local, DB_Session_Sheets
 from .Wheel_Linked import Wheel
 
 # from Wheel_Linked import Wheel
@@ -210,6 +210,7 @@ class Instabot:
             Instabot.__NOTIFICATION.send(
                 f"{traceback.format_exc()},{datetime.now(Instabot.__EST)}"
             )
+            self.stop_scrape()
 
     def stop_scrape(self):
         """Sends a request to stop the cronjob the local machine
@@ -235,7 +236,7 @@ class Instabot:
             )
 
     def monitor_users(self):
-        """Goes the saved followers usernames and rotates each time to see the date stamp of their
+        """Gets the saved followers usernames and rotates each time to see the date stamp of their
         most recent post
         """
         if not self.cooldown:
