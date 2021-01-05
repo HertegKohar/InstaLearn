@@ -21,9 +21,9 @@ from instaloader.exceptions import (
 from notify_run import Notify
 from pytz import timezone
 from .Instabase import DB_Session, DB_Session_Local, DB_Session_Sheets
-from .Wheel_Linked import Wheel
+from .Linked_List import Linked_List
 
-# from Wheel_Linked import Wheel
+# from Linked_List import Wheel
 # from Instabase import *
 
 
@@ -46,12 +46,12 @@ class Instabot:
         # Create an Instaloader instance
         self.__I_session = instaloader.Instaloader(max_connection_attempts=1)
         self.__I_session.login(username, password)
-        self.users = Wheel()
+        self.users = Linked_List()
         self.date_stamp = datetime(
             datetime.today().year, datetime.today().month, datetime.today().day, 0, 0
         )
-        self.add_users()
         self.cooldown = False
+        self.add_users()
 
     # Time wrapper to get the execution time of a function
     def timer(func):
@@ -70,13 +70,13 @@ class Instabot:
         return wrapper
 
     @timer
-    def test_notification(self):
+    def test_notification(self) -> None:
         """Tests the notification channel
         """
         Instabot.__LOGGER.debug("Testing notification")
         Instabot.__NOTIFICATION.send("Testing Notification")
 
-    def add_users(self):
+    def add_users(self) -> None:
         """Adds the followers of the account and changes the date stamp to the most recent post
         """
         users = Profile.from_username(
@@ -85,18 +85,18 @@ class Instabot:
         if not self.users.is_empty():
             self.users.clear()
         for user in users:
-            self.users.add(user.username)
+            self.users.append(user.username)
             Instabot.__LOGGER.debug(f"Added User {user.username}")
             date_stamp = self.set_date_user(user)
             if date_stamp > self.date_stamp:
                 self.date_stamp = date_stamp
-        Instabot.__LOGGER.debug(f"New Date Stamp: {date_stamp}")
+        Instabot.__LOGGER.debug(f"New Date Stamp: {self.date_stamp}")
         if self.cooldown:
             self.reset_cooldown()
         self.stop_date = None
         self.save_bot()
 
-    def set_date_user(self, profile: Profile):
+    def set_date_user(self, profile: Profile) -> datetime:
         """Obtains the latest post of the profile given and returns the date stamp of the post in UTC
 
         Args:
@@ -109,11 +109,11 @@ class Instabot:
         return date_stamp
 
     # Reset cooldown
-    def reset_cooldown(self):
+    def reset_cooldown(self) -> None:
         self.cooldown = not self.cooldown
 
     # Find the most recent post and take it's date
-    def set_date_stamp(self):
+    def set_date_stamp(self) -> None:
         self.date_stamp = next(self.__I_session.get_feed_posts()).date_utc
 
     # Used to reset after a 429
@@ -212,7 +212,7 @@ class Instabot:
             )
             self.stop_scrape()
 
-    def stop_scrape(self):
+    def stop_scrape(self) -> None:
         """Sends a request to stop the cronjob the local machine
         """
         try:
@@ -235,14 +235,14 @@ class Instabot:
                 f"{traceback.format_exc()},{datetime.now(Instabot.__EST)}"
             )
 
-    def monitor_users(self):
+    def monitor_users(self) -> None:
         """Gets the saved followers usernames and rotates each time to see the date stamp of their
         most recent post
         """
         if not self.cooldown:
-            user = self.users.get_next()
-            Instabot.__LOGGER.debug(f"Monitoring {user}")
-            self.monitor_user(user)
+            for user in self.users:
+                Instabot.__LOGGER.debug(f"Monitoring {user}")
+                self.monitor_user(user)
         else:
             Instabot.__LOGGER.warning("429 Need to cooldown")
 
