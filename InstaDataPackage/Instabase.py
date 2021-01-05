@@ -74,7 +74,7 @@ class DB_Session_Local:
     def transfer_to_sheet(self):
         self.__cursor.execute("SELECT * FROM accounts")
         with DB_Session_Sheets() as sheet:
-            sheet.insert([output for output in self.__cursor])
+            sheet.insert(self.__cursor.fetchall())
         self.__cursor.execute("DELETE FROM accounts")
         self.__connection.commit()
         self.__cursor.execute("vacuum")
@@ -84,17 +84,15 @@ class DB_Session_Local:
         """Shows the entries for the account data collected
         """
         self.__cursor.execute("SELECT * FROM accounts")
-        return [output for output in self.__cursor]
+        return self.__cursor.fetchall()
 
     def size(self):
         """Shows the number of entries for the user data and the account data
         """
         self.__cursor.execute("SELECT COUNT(*) FROM accounts")
-        for output in self.__cursor:
-            print("Accounts: {}".format(output))
+        print(f"Accounts: {self.__cursor.fetchone()[0]}")
         self.__cursor.execute("SELECT COUNT(*) FROM users")
-        for output in self.__cursor:
-            print("Users: {}".format(output))
+        print(f"Users: {self.__cursor.fetchone()[0]}")
 
 
 class DB_Session_Sheets:
@@ -137,7 +135,7 @@ class DB_Session:
         self.__connection.close()
 
     # Description of table
-    def _description(self):
+    def _description(self) -> list:
         """Gives a description of the database table
 
         Returns:
@@ -147,7 +145,7 @@ class DB_Session:
         description = [output for output in self.__cursor]
         return description
 
-    def insert(self, data: tuple):
+    def insert(self, data: tuple) -> None:
         """Inserts user data in database
 
         Args:
@@ -170,7 +168,7 @@ class DB_Session:
         finally:
             self.__connection.commit()
 
-    def size(self):
+    def size(self) -> int:
         """Returns the amount of rows in the database table
 
         Returns:
@@ -181,7 +179,7 @@ class DB_Session:
             rows = output[0]
         return rows
 
-    def query(self, users: list):
+    def query(self, users: list) -> pd.DataFrame:
         """Queries and returns user data for the list of users
 
         Args:
@@ -227,7 +225,7 @@ class DB_Session:
                 df = df.append({"User": user}, ignore_index=True)
         return df
 
-    def query_found(self, users: list):
+    def query_found(self, users: list) -> pd.DataFrame:
         """Searches the database table for users
 
         Args:
@@ -250,12 +248,12 @@ class DB_Session:
                 df = df.append({"User": user, "Found": False}, ignore_index=True)
         return df
 
-    def show(self):
+    def show(self) -> list:
         """Shows all the entries in the database table
 
         Returns:
             list: A list of all user data within the table
         """
         self.__cursor.execute("SELECT * FROM insta_train")
-        entries = [output for output in self.__cursor]
-        return entries
+
+        return self.__cursor.fetchall()
